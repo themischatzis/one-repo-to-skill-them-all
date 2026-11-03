@@ -9,3 +9,7 @@
   credentials, or local configuration. Refer to `JIRA_BOARD` instead.
 - Keep personal configuration outside the repo; `.env.example` contains only
   placeholders.
+- Keep external skill and MCP inventories in their respective skill READMEs.
+  Distinguish observed installs from built-ins and session integrations.
+- Verify installation commands against CLI help or official upstream docs.
+  Never vendor third-party skills or publish real MCP configuration/auth data.
