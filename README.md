@@ -12,9 +12,9 @@ No rings, no prophecies, no framework. Just Markdown with a purpose.
 
 | Skill | Its quest |
 |---|---|
-| [create-jira-bug](skills/create-jira-bug/SKILL.md) | Turn "it's broken" into a useful Jira bug, with context, impact, reproduction steps, and expected behaviour. |
-| [external-skills](skills/external-skills/SKILL.md) | Remember which skills were borrowed, where they came from, and how to invite them back. |
-| [mcp-servers](skills/mcp-servers/SKILL.md) | Reconnect the palantirs: MCP servers, authentication, and setup instructions. |
+| [create-jira-bug](skills/create-jira-bug/README.md) | Turn "it's broken" into a useful Jira bug, with context, impact, reproduction steps, and expected behaviour. |
+| [external-skills](skills/external-skills/README.md) | Remember which skills were borrowed, where they came from, and how to invite them back. |
+| [mcp-servers](skills/mcp-servers/README.md) | Reconnect the palantirs: MCP servers, authentication, and setup instructions. |
 
 Rebuilding the laptop? Start with the
 [external skills guide](skills/external-skills/README.md) and
@@ -41,54 +41,29 @@ existing fellowship. Repeat the link step for any future skills you want to use.
 In Copilot CLI, run `/skills reload`, then `/skills info create-jira-bug`.
 Personal skills are shared across your projects, not copied into each repo.
 
-## Keep Mordor's address private
-
-The Jira skill uses `JIRA_BOARD`. The real board URL belongs on your laptop,
-not in this public repo.
-
-```sh
-mkdir -p "$HOME/.config/one-repo-to-skill-them-all"
-cp .env.example "$HOME/.config/one-repo-to-skill-them-all/env"
-chmod 600 "$HOME/.config/one-repo-to-skill-them-all/env"
-```
-
-Edit that local file to set your board URL. Load it before starting Copilot:
-
-```sh
-source "$HOME/.config/one-repo-to-skill-them-all/env"
-```
-
-For future login shells, add this once to `~/.zprofile`:
-
-```sh
-if [ -f "$HOME/.config/one-repo-to-skill-them-all/env" ]; then
-  . "$HOME/.config/one-repo-to-skill-them-all/env"
-fi
-```
-
-The skill can also load that exact local file when `JIRA_BOARD` isn't inherited.
-Jira access comes from your authenticated Atlassian tools; this file is not a
-place for API tokens. Never commit real board URLs, credentials, or company data.
-
 ## Send it on a quest
 
-Ask Copilot:
+Choose your companion from [the fellowship](#the-fellowship), then read its
+`skills/<skill-name>/README.md`. That is the map for humans: what it does,
+what it needs, and how to get it moving. The neighbouring `SKILL.md` is the
+wizard's instruction manual. Please do not swap them; the wizard is confused
+enough already.
 
-> Use create-jira-bug: this page returns 200 when it should redirect. Here are the reproduction steps...
+Ask Copilot to use the skill by name and describe your quest. Skills can load
+when your request matches their description; an explicit name saves everyone
+a meeting at Rivendell.
 
-The skill uses your bug-report format and creates a **Bug**, not an epic saga.
-It won't invent browser coverage, customer impact, or the correct URL.
-
-You can also invoke `/create-jira-bug` without arguments. It will ask for the
-bug details, brand, affected browsers/devices, and epic/parent, plus the
-environment if Jira requires it and the report doesn't establish it.
-Nothing is created until you supply the missing answers. No answering on your
-behalf, even if the wizard is temporarily unavailable.
+Some companions need local configuration, a connected service, or answers
+before setting off. Their own READMEs explain the particulars. Keep secrets
+on your laptop, read permission prompts, and remember: installing a skill is
+not the same as authenticating a service. Even Gandalf needs to sign in.
 
 ## Contributing to the fellowship
 
 Add a folder under `skills/` containing a `SKILL.md` with `name` and `description`
-frontmatter. Keep it small, useful, and free of private information.
+frontmatter, plus a `README.md` for usage and skill-specific setup. Link that
+README from the fellowship table. Keep it small, useful, and free of private
+information.
 
 Commit and PR titles use `feat: Capitalized title`, for example
 `feat: Add Jira bug reporting skill`. No ticket prefixes: this is a personal
