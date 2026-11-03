@@ -3,6 +3,8 @@
 - This is a personal collection of AI skills. Keep changes small and readable.
 - Put each skill in `skills/<lowercase-hyphenated-name>/SKILL.md`, with matching
   `name` and a description explaining when to use it.
+- Put human-facing usage and skill-specific setup in that skill's `README.md`.
+  Keep the top-level README generic and link to each skill's README.
 - Use commit and PR titles in the form `feat: Capitalized title`. Do not add
   Jira keys or other ticket prefixes.
 - Never publish real Jira board URLs, organisation-specific IDs, customer data,
