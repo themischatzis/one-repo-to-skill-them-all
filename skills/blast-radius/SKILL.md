@@ -6,7 +6,7 @@ description: Find what a change could break elsewhere before it ships, and prove
 # Blast radius
 
 Find the breakage grep won't show you. Listing callers is not the job.
-Adapted from Cursor's pstack `blast-radius` skill. Read-only: report, don't fix.
+Read-only: report, don't fix.
 
 ## Don't trust your own writeup
 
