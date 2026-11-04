@@ -1,6 +1,6 @@
 ---
 name: skill-retro
-description: Keep a private journal of how Themis works and review the personal skills against it. Use to log a working-style observation ("note that...", "log this") or for a skill retro: "review my skills", "weekly retro", "what should change in the skills".
+description: Keep a private journal of how Themis works and review the personal skills against it. Use to log a working-style observation ("note that...", "log this") or for a skill retro, such as "review my skills", "weekly retro", "what should change in the skills".
 ---
 
 # Skill retro
