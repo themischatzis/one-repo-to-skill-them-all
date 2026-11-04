@@ -6,7 +6,7 @@ description: End-to-end playbook for fixing a bug: from a Jira ticket or a descr
 # Bug hunt
 
 You own the outcome: plan, delegate the legwork, review, verify.
-Adapted from pstack's Bug fix playbook. Read `ground-rules` first.
+Read `ground-rules` first.
 
 Every shipped line traces to evidence. A "might help" guard is a hypothesis,
 not a fix; if evidence refutes it, revert what it motivated.

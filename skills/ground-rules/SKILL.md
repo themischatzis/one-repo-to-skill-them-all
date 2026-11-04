@@ -5,8 +5,7 @@ description: Themis's core engineering principles, condensed. Read before any no
 
 # Ground rules
 
-Adapted from Cursor's pstack `poteto-mode` principles, merged with the
-installed `ponytail` skill. Apply the ones that fit; in the reply, name each
+Principles merged with the installed `ponytail` skill. Apply the ones that fit; in the reply, name each
 rule that changed a decision and the choice it changed. Say nothing about the rest.
 
 ## Shape of the change

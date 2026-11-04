@@ -6,7 +6,7 @@ description: End-to-end playbook for delivering a Jira ticket or feature request
 # Ticket quest
 
 You own the design: plan, delegate, review, verify.
-Adapted from pstack's Feature playbook. Read `ground-rules` first.
+Read `ground-rules` first.
 Use `bug-hunt` instead for defects, `figure-it-out` for large or
 multi-day work.
 

@@ -6,7 +6,7 @@ description: Find out why code is shaped the way it is, using git history, PRs a
 # Why is it like this
 
 Recover intent from history, not from guessing. Read-only.
-Adapted from pstack `why`; companion to `how-does-it-work`.
+Companion to `how-does-it-work`.
 
 ## Steps
 

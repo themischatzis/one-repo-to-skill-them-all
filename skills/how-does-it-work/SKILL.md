@@ -7,7 +7,6 @@ description: Explain how a subsystem, feature or code path works, or where somet
 
 Produce the explanation a senior engineer would give to someone onboarding:
 enough for a working mental model, not annotated source. Read-only.
-Adapted from pstack `how`.
 
 ## 1. Size it
 

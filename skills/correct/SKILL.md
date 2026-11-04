@@ -6,7 +6,6 @@ description: Turn repeated agent or reviewer corrections in a repo into structur
 # Correct
 
 Change the repo so the next contributor can't repeat the mistake.
-Adapted from Cursor's pstack `correct` skill.
 
 Assume every contributor only sees the files it opened and copies the nearest
 example. Make a change that looks right from one file right for the whole repo.

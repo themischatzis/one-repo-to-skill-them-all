@@ -6,7 +6,6 @@ description: Fix a bug test-first when there is a cheap, obvious test target. Us
 # TDD bug fix
 
 Make the broken behaviour executable before touching production code.
-Adapted from Cursor's pstack `tdd` skill.
 
 ## When not to
 

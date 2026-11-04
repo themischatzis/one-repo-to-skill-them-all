@@ -6,7 +6,7 @@ description: Adversarial review where independent subagents try to break a chang
 # Interrogate
 
 Adversaries try to break a change. A finding survives only if a run proves it.
-Report; do not fix. Adapted from pstack `interrogate`.
+Report; do not fix.
 
 ## Frame
 

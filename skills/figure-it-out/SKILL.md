@@ -6,7 +6,7 @@ description: Design an auditable playbook when no narrower skill fits: a large m
 # Figure it out
 
 When no playbook fits, design one. The first deliverable is the workflow
-itself, then you run it. Adapted from pstack `figure-it-out`. Read
+itself, then you run it. Read
 `ground-rules` first.
 
 ## A. Frame
