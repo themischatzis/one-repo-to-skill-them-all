@@ -55,6 +55,20 @@ rule that changed a decision and the choice it changed. Say nothing about the re
 - No is an acceptable answer. Push back when the premise is wrong; candour over
   agreement.
 
+## Git conventions
+
+- Check recent branches, commits and the PR template before naming anything.
+  If unsure, ask.
+- Work repo with a ticket: use the ticket's own key. WWP is
+  the usual prefix, but if the ticket has another prefix (e.g. ABC), use that.
+  Branch `type/key-nnnn-slug` (key lowercase); commit and PR title
+  `type(KEY-NNNN): Capital first letter` (key uppercase), even when repo
+  history is lowercase. Work repo but no ticket: use `WWP-0000`.
+- Personal repo (no ticket, no key): branch `type/what-i-am-doing`; commit and
+  PR title `type: Capital first letter`.
+- If SSH push fails, push once over HTTPS with `gh auth git-credential`
+  (`-c credential.helper=...`); change no git config.
+
 ## Reply style
 
 Short declarative sentences. Open with the user's goal in your own words.
