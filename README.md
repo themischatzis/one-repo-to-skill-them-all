@@ -70,6 +70,12 @@ Ask Copilot:
 The skill uses your bug-report format and creates a **Bug**, not an epic saga.
 It won't invent browser coverage, customer impact, or the correct URL.
 
+You can also invoke `/create-jira-bug` without arguments. It will ask for the
+bug details, brand, affected browsers/devices, and epic/parent, plus the
+environment if Jira requires it and the report doesn't establish it.
+Nothing is created until you supply the missing answers. No answering on your
+behalf, even if the wizard is temporarily unavailable.
+
 ## Contributing to the fellowship
 
 Add a folder under `skills/` containing a `SKILL.md` with `name` and `description`
