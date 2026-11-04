@@ -13,6 +13,13 @@ No rings, no prophecies, no framework. Just Markdown with a purpose.
 | Skill | Its quest |
 |---|---|
 | [create-jira-bug](skills/create-jira-bug/SKILL.md) | Turn "it's broken" into a useful Jira bug, with context, impact, reproduction steps, and expected behaviour. |
+| [external-skills](skills/external-skills/SKILL.md) | Remember which skills were borrowed, where they came from, and how to invite them back. |
+| [mcp-servers](skills/mcp-servers/SKILL.md) | Reconnect the palantirs: MCP servers, authentication, and setup instructions. |
+
+Rebuilding the laptop? Start with the
+[external skills guide](skills/external-skills/README.md) and
+[MCP setup guide](skills/mcp-servers/README.md). These record the observed setup,
+not a bag of credentials or a promise to install anything automatically.
 
 ## Equip your skills
 
@@ -24,6 +31,8 @@ git clone https://github.com/themischatzis/one-repo-to-skill-them-all.git
 cd one-repo-to-skill-them-all
 mkdir -p "$HOME/.copilot/skills"
 ln -s "$PWD/skills/create-jira-bug" "$HOME/.copilot/skills/create-jira-bug"
+ln -s "$PWD/skills/external-skills" "$HOME/.copilot/skills/external-skills"
+ln -s "$PWD/skills/mcp-servers" "$HOME/.copilot/skills/mcp-servers"
 ```
 
 If that destination already exists, inspect it first; don't overwrite your
