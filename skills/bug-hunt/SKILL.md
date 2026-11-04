@@ -1,6 +1,6 @@
 ---
 name: bug-hunt
-description: End-to-end playbook for fixing a bug: from a Jira ticket or a description to a reproduced, root-caused, test-first, verified fix. Use for "fix this bug", "investigate this defect", "this is broken", or a Jira bug key.
+description: End-to-end playbook for fixing a bug, from a Jira ticket or a description to a reproduced, root-caused, test-first, verified fix. Use for "fix this bug", "investigate this defect", "this is broken", or a Jira bug key.
 ---
 
 # Bug hunt

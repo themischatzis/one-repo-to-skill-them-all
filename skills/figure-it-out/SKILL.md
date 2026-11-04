@@ -1,6 +1,6 @@
 ---
 name: figure-it-out
-description: Design an auditable playbook when no narrower skill fits: a large migration, an ambitious multi-part change, or work Themis reviews after stepping away. Scales rigour to the task, runs a hypothesis loop and logs decisions. Use for "figure it out" or when bug-hunt and ticket-quest don't fit.
+description: Design an auditable playbook when no narrower skill fits, such as a large migration, an ambitious multi-part change, or work Themis reviews after stepping away. Scales rigour to the task, runs a hypothesis loop and logs decisions. Use for "figure it out" or when bug-hunt and ticket-quest don't fit.
 ---
 
 # Figure it out

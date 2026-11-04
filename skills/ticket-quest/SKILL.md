@@ -1,6 +1,6 @@
 ---
 name: ticket-quest
-description: End-to-end playbook for delivering a Jira ticket or feature request: understand, design small, build in verifiable units, review and prove. Use for "work on this ticket", "implement PROJ-123", "build this", or any non-bug change.
+description: End-to-end playbook for delivering a Jira ticket or feature request - understand, design small, build in verifiable units, review and prove. Use for "work on this ticket", "implement PROJ-123", "build this", or any non-bug change.
 ---
 
 # Ticket quest
