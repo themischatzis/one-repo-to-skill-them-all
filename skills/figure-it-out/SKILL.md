@@ -46,6 +46,8 @@ hypothesis, action, result, verdict. Only commit it if asked.
 
 ## E. Verify and hand back
 
+Before any branch, commit or PR name, re-read the `ground-rules` section 'Git conventions' (view from that heading; don't rely on a truncated read) and the repo's CONTRIBUTING. The personal rule wins; mention any conflict.
+
 Check the whole against the Phase A predicate on the real product. Turn any
 recurring correction into a guard (`correct`).
 

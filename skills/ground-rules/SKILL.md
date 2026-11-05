@@ -8,6 +8,27 @@ description: Themis's core engineering principles, condensed. Read before any no
 Principles merged with the installed `ponytail` skill. Apply the ones that fit; in the reply, name each
 rule that changed a decision and the choice it changed. Say nothing about the rest.
 
+## Choose the skill yourself
+
+Before answering any request, in any mode (plan too), decide which skill fits.
+He talks; you pick. Questions count: a "how", "why", "is this safe" or "review
+this" is a skill trigger, not small talk.
+
+| Request | Skill |
+|---|---|
+| Bug, broken, Jira Bug | `bug-hunt` |
+| Other ticket or feature | `ticket-quest` |
+| How/where does X work | `how-does-it-work` |
+| Why is it like this, who changed it | `why-is-it-like-this` |
+| Review a PR, branch or diff | `review-change` |
+| Rebase, resolve conflicts, merge | `rebase-conflicts` |
+| What could this break | `blast-radius` |
+| Contested design, stress test | `interrogate` |
+| Nothing fits, large or unusual | `figure-it-out` |
+
+Skip heavy skills for trivial changes and say so. Always name the skill you
+used and why.
+
 ## Shape of the change
 
 - **Smallest change that fully solves it.** Delete before adding. No new
@@ -68,6 +89,12 @@ rule that changed a decision and the choice it changed. Say nothing about the re
   PR title `type: Capital first letter`.
 - If SSH push fails, push once over HTTPS with `gh auth git-credential`
   (`-c credential.helper=...`); change no git config.
+
+## End-of-task summary
+
+Close every task with: skills and subagents used (and any skipped, with why);
+what he should do differently next time; one line worth logging to the journal
+(`skill-retro`).
 
 ## Reply style
 
