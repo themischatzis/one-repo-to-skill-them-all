@@ -35,5 +35,5 @@ PR number or URL, explicit words, then topic.
 
 Agents: edits to `sam`; comment cleanup on a diff to `gollum`.
 
-Build skills end by offering `pr-forge`. Commits, pushes, PRs and Jira writes
-are ask-first. Close tasks per `ground-rules`.
+Build skills end by offering `pr-forge`. Never merge a PR unless he says so
+for that PR. Commits, pushes, PRs and Jira writes are ask-first. Close tasks per `ground-rules`.

@@ -21,7 +21,11 @@ The [skill instructions](SKILL.md) have the detail.
 ## Setup
 
 Notes live in a separate **private** repo so they follow you across laptops
-and stay out of this public one:
+and stay out of this public one. The journal is split so a review stays cheap:
+`inbox.md` (unreviewed, the only file read by default), `ideas.md` (undecided),
+`rejected.md` (decided no, searched before proposing), `reviewed/YYYY-MM.md`
+(applied or kept) and `sessions/` (daily auto-log). After each review, inbox
+lines are filed into the right place.
 
 ```sh
 gh repo clone themischatzis/skill-journal "$HOME/Projects/skill-journal"
