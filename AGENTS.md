@@ -5,6 +5,10 @@
   `name` and a description explaining when to use it.
 - Put human-facing usage and skill-specific setup in that skill's `README.md`.
   Keep the top-level README generic and link to each skill's README.
+- Custom agents go in `agents/<name>.agent.md`, documented in `agents/README.md`.
+- Every new, renamed or removed skill or agent needs a row change in the
+  routing table in `copilot-instructions.md`; that file is how plain requests
+  reach the right skill.
 - Use commit and PR titles in the form `feat: Capitalized title`. Do not add
   Jira keys or other ticket prefixes.
 - Never publish real Jira board URLs, organisation-specific IDs, customer data,
