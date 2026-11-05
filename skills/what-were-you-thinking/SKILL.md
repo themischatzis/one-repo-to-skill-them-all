@@ -5,7 +5,7 @@ description: Keep a TSV decision log for long, autopilot or multi-phase work The
 
 # What were you thinking?
 
-Bilbo wrote down what happened so others could read it later. Keep one log per
+Keep one log per
 run, one row per decision, so he can audit the run without replaying it.
 
 ## Format

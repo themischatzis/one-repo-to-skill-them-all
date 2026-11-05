@@ -3,9 +3,9 @@ name: catch-me-up
 description: Plain-words catch-up on what changed this session and every call waiting on Themis. Use for "catch me up", "palantir", "what happened", "what's waiting on me", "explain that simply", or after a long autopilot run.
 ---
 
-# Palantir
+# Catch me up
 
-Look into the stone, report what is there. Read-only: change no code, start no
+Report what is there, in plain words. Read-only: change no code, start no
 job, post nothing. Read `ground-rules` for reply style.
 
 Assume he remembers his last message and nothing after it. Notifications and

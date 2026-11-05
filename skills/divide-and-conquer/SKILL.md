@@ -5,7 +5,7 @@ description: Fan out parallel subagents over independent slices, return one cons
 
 # Divide and conquer
 
-The eagles arrive when the work is wide, not when it is hard. Parallel subagents cost
+Use when the work is wide, not when it is hard. Parallel subagents cost
 credits and context: use only on independent slices. Never for one continuous
 trace. Read `ground-rules` (guard the context window, separate shared state).
 

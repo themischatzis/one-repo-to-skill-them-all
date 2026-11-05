@@ -5,7 +5,7 @@ description: Run several independent attempts at one task, pick the best base, g
 
 # Compare designs
 
-A council with many voices and one decision. Costs several subagents: skip it for mechanical or
+Several independent attempts, one decision. Costs several subagents: skip it for mechanical or
 obvious work. Read `ground-rules`; reuse `divide-and-conquer` for the fan-out.
 
 ## Steps

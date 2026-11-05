@@ -1,6 +1,6 @@
 ---
 name: sam
-description: Loyal delegate subagent for implementation and helper tasks spawned from a larger run. Reads ground-rules first, works one bounded task, reports with evidence. Use instead of a generic agent when delegating edits.
+description: Delegate subagent for bounded implementation and helper tasks from a larger run. Reads ground-rules first, reports with evidence. Use instead of a generic agent when delegating edits.
 ---
 
 # Sam

@@ -5,7 +5,7 @@ description: Drive an open PR to merge-ready, or check on it: conflicts first, t
 
 # Babysit PR
 
-Light the beacons only when something needs attention. Read `ground-rules`.
+Only report when something needs attention. Read `ground-rules`.
 
 ## Pick a mode first
 

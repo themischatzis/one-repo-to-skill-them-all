@@ -41,12 +41,12 @@ No rings, no prophecies, no framework. Just Markdown with a purpose.
 
 ### Agents
 
-Custom agents have their own [README](agents/README.md).
-
 | Agent | Its quest |
 |---|---|
-| [gollum](agents/README.md) | Hates unnecessary comments with his whole heart. |
-| [sam](agents/README.md) | A loyal delegate that carries the edits. |
+| [gollum](agents/gollum/README.md) | Hates unnecessary comments with his whole heart. |
+| [sam](agents/sam/README.md) | A loyal delegate that carries the edits. |
+
+Run `/agent` to confirm they are listed.
 
 Rebuilding the laptop? Start with the
 [external skills guide](skills/external-skills/README.md) and
@@ -68,7 +68,7 @@ for s in skills/*/; do
 done
 
 mkdir -p "$HOME/.copilot/agents"
-for a in agents/*.agent.md; do
+for a in agents/*/*.agent.md; do
   n=$(basename "$a")
   [ -e "$HOME/.copilot/agents/$n" ] || ln -s "$PWD/$a" "$HOME/.copilot/agents/$n"
 done

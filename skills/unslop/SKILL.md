@@ -5,7 +5,7 @@ description: Write or edit prose plainly and strip AI tells. Use for PR text, co
 
 # Unslop
 
-Speak, friend, and enter: say the password plainly and the door opens.
+Say it plainly. Write so a tired engineer understands on the first read.
 
 ## Pick the document's job first
 
