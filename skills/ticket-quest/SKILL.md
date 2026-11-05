@@ -42,8 +42,11 @@ multi-day work.
 
 ## Do not
 
-Don't apply `ponytail`'s lazy mode to the build: it undershot on features.
-Design properly first, keep the diff small second.
+Keep using `ponytail` on the build: we are seniors, so simple and not
+over-engineered. If a feature is turning out more complicated than usual,
+stop and say so. Don't introduce a new way of doing something the repo already
+does: find how it does it (where values, config, state and data come from) and
+follow that.
 
 Before any branch, commit or PR name, re-read the `ground-rules` section 'Git conventions' (view from that heading; don't rely on a truncated read) and the repo's CONTRIBUTING. The personal rule wins; mention any conflict.
 
