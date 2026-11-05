@@ -41,6 +41,8 @@ not a fix; if evidence refutes it, revert what it motivated.
 
 ## Do not
 
+Before any branch, commit or PR name, re-read the `ground-rules` section 'Git conventions' (view from that heading; don't rely on a truncated read) and the repo's CONTRIBUTING. The personal rule wins; mention any conflict.
+
 Commit, push, open a PR, comment on or transition the Jira ticket unless asked.
 Offer them at the end.
 

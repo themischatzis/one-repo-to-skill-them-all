@@ -33,10 +33,19 @@ multi-day work.
    real surface (run it, hit the endpoint, open the page).
 7. **Review.** `blast-radius` on the change; `code-review` on the diff;
    `interrogate` if the design was contested.
-8. **Hand off.** Draft a short PR description (why first, then what, then how
+8. **Retro Q&A.** Use `ask_user` for 3-4 short questions: what was unclear in
+   the ticket, which decision he would have made differently, what review
+   found that the build should have caught, what to do next time. Log the
+   answers with `skill-retro`. Skip only for trivial changes.
+9. **Hand off.** Draft a short PR description (why first, then what, then how
    it was verified) and a Jira comment, and offer them. Do not post.
 
 ## Do not
+
+Don't apply `ponytail`'s lazy mode to the build: it undershot on features.
+Design properly first, keep the diff small second.
+
+Before any branch, commit or PR name, re-read the `ground-rules` section 'Git conventions' (view from that heading; don't rely on a truncated read) and the repo's CONTRIBUTING. The personal rule wins; mention any conflict.
 
 Commit, push, branch, open a PR, comment on or transition the ticket unless asked.
 Don't add scope the ticket didn't ask for; note it as a follow-up.

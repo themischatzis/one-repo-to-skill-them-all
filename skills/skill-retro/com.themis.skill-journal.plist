@@ -8,5 +8,8 @@
   <key>StartCalendarInterval</key><dict>
     <key>Hour</key><integer>16</integer><key>Minute</key><integer>0</integer>
   </dict>
+  <key>EnvironmentVariables</key><dict>
+    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
   <key>StandardErrorPath</key><string>/tmp/skill-journal.log</string>
 </dict></plist>

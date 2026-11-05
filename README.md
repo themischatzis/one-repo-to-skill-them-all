@@ -20,6 +20,8 @@ No rings, no prophecies, no framework. Just Markdown with a purpose.
 | [ticket-quest](skills/ticket-quest/README.md) | Deliver a Jira ticket in small verified units. |
 | [how-does-it-work](skills/how-does-it-work/README.md) | Cited explanations of how code works. |
 | [why-is-it-like-this](skills/why-is-it-like-this/README.md) | History and intent behind the code. |
+| [review-change](skills/review-change/README.md) | Review a PR, branch or diff against its intent, with proven findings. |
+| [rebase-conflicts](skills/rebase-conflicts/README.md) | Rebase a branch and resolve conflicts safely and repeatably. |
 | [interrogate](skills/interrogate/README.md) | Adversarial review where only run-proven findings survive. |
 | [figure-it-out](skills/figure-it-out/README.md) | Design a playbook for large or unusual work. |
 | [tdd-bug-fix](skills/tdd-bug-fix/README.md) | Fix bugs test-first when the test is cheap. |
