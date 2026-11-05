@@ -56,6 +56,8 @@ Routing lives in `copilot-instructions.md`, which loads every session.
 - Just do: reading, local edits, running tests, reading Jira/Figma/GitHub.
 - Ask first: commit, push, branch, PR, Jira transitions or comments, deploys,
   deletes, force-pushes, anything visible to other people.
+- **Never merge a PR unless he tells you to merge that exact PR.** Opening one
+  is not permission to merge it, even a tiny fix.
 - No is an acceptable answer. Push back when the premise is wrong; candour over
   agreement.
 

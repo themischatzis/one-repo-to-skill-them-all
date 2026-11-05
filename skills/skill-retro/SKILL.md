@@ -5,16 +5,27 @@ description: Private journal of how Themis works, and review of his skills again
 
 # Skill retro
 
-The journal is `journal.md` in the private `skill-journal` repo, cloned at
+The journal is the private `skill-journal` repo, cloned at
 `$SKILL_JOURNAL_DIR` (default `~/Projects/skill-journal`). If the clone is
 missing, ask before cloning `themischatzis/skill-journal` with `gh`.
 This skill is public: never copy journal contents, tickets, company names or
 usernames into this repo.
 
+Layout, kept small on purpose:
+
+- `inbox.md`: unreviewed lines. New observations go here.
+- `ideas.md`: undecided. `rejected.md`: decided no, with a reason.
+- `reviewed/YYYY-MM.md`: applied or kept. `sessions/`: daily auto-log.
+
+Read only `inbox.md` by default. Read `ideas.md`, `reviewed/` or `sessions/`
+only when he asks. Before proposing something new, `grep` `rejected.md` so it
+is not offered twice.
+
 ## Log
 
 When asked to note something, or when a skill from this repo was just used and
-Themis corrected, rejected, overrode or praised something, append one line:
+Themis corrected, rejected, overrode or praised something, append one line to
+`inbox.md`:
 `- YYYY-MM-DD [skill] observation → keep | change | add | delete?`
 Record observed behaviour and quoted preferences, not guesses about him.
 Don't log every turn unprompted. Pull before writing. Commit the journal
@@ -23,7 +34,8 @@ cross-repo preference is stated, also offer to save it as a Copilot memory.
 
 ## Review
 
-1. Pull the journal; read it plus `git log`/`git status` of the skills repo.
+1. Pull the journal; read `inbox.md` (plus `ideas.md` only if asked) and
+   `git log`/`git status` of the skills repo.
 2. Query past sessions (`session_store_sql`, last 7-14 days) for sessions that
    used these skills: which ran, which never did, where he corrected course,
    what he asked for that no skill covered.
@@ -33,7 +45,10 @@ cross-repo preference is stated, also offer to save it as a Copilot memory.
 4. Present a table (skill, evidence, verdict, proposed change), then make the
    agreed edits uncommitted for review. Don't commit, branch or open a PR
    unless asked.
-5. Append a dated retro line to the journal.
+5. File every inbox line after he decides: applied or kept to
+   `reviewed/YYYY-MM.md`, undecided to `ideas.md`, no to `rejected.md` with a
+   reason. Leave anything not yet decided in the inbox. Then add one dated
+   retro line to the new month's `reviewed/` file.
 
 ## Reflect (after one session)
 
