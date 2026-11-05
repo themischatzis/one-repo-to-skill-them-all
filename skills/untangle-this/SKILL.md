@@ -1,9 +1,9 @@
 ---
-name: rebase-conflicts
+name: untangle-this
 description: Rebase a branch or PR onto its base and resolve merge conflicts safely. Use for "rebase", "resolve conflicts", "update my branch", "PR has conflicts".
 ---
 
-# Rebase conflicts
+# Untangle this
 
 1. **Prepare.** `git status` must be clean (stash or ask). Identify branch
    and base (`gh pr view` if a PR). `git fetch`. Note the current tip SHA as

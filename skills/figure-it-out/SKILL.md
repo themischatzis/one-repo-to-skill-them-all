@@ -1,6 +1,6 @@
 ---
 name: figure-it-out
-description: Design an auditable playbook when no narrower skill fits, such as a large migration, an ambitious multi-part change, or work Themis reviews after stepping away. Scales rigour to the task, runs a hypothesis loop and logs decisions. Use for "figure it out" or when bug-hunt and ticket-quest don't fit.
+description: Design an auditable playbook for large, unusual or unattended work (migration, multi-part change) when no narrower skill fits. Use for "figure it out".
 ---
 
 # Figure it out
@@ -41,15 +41,17 @@ easily, suspect the check first. Pair delegated work with an independent
 
 ## D. Keep the trail
 
-Keep a short decision log in the session `files/` folder: one row per step with
-hypothesis, action, result, verdict. Only commit it if asked.
+Keep the decision log with `what-were-you-thinking` (one row per step: hypothesis, action,
+result, verdict). Only commit it if asked. For an unattended run, write the
+finish condition and an escape hatch first (stop and write up why if stuck),
+and use `where-was-i` to pause or resume.
 
 ## E. Verify and hand back
 
-Before any branch, commit or PR name, re-read the `ground-rules` section 'Git conventions' (view from that heading; don't rely on a truncated read) and the repo's CONTRIBUTING. The personal rule wins; mention any conflict.
+Use `pr-forge` for branch, commit and PR work (its Git conventions and the repo's CONTRIBUTING apply; the personal rule wins).
 
 Check the whole against the Phase A predicate on the real product. Turn any
-recurring correction into a guard (`correct`).
+recurring correction into a guard (`never-again`).
 
 **Reply:** the playbook, rigour and why, path to the trail, what is verified
 against the predicate, what is still open.

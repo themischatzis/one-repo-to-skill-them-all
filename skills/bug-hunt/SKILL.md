@@ -1,6 +1,6 @@
 ---
 name: bug-hunt
-description: End-to-end playbook for fixing a bug, from a Jira ticket or a description to a reproduced, root-caused, test-first, verified fix. Use for "fix this bug", "investigate this defect", "this is broken", or a Jira bug key.
+description: Fix a bug end to end: reproduce, root-cause, test-first fix, verify. Use for "fix this bug", "this is broken", "investigate this defect", or a Jira bug key.
 ---
 
 # Bug hunt
@@ -23,11 +23,11 @@ not a fix; if evidence refutes it, revert what it motivated.
    logging until it does.
 3. **Find the cause by elimination.** List candidate hypotheses, then pick the
    check that cuts the most space, get runtime evidence, eliminate. Use
-   `how-does-it-work` for the area and `why-is-it-like-this` for regression
+   `how-tf` for the area and `who-did-this` for regression
    history. Send bulky reading to `explore` subagents. Confirm the surviving
    mechanism with an experiment, not by reading alone.
 4. **Plan the smallest root-cause fix.** Crossing a function boundary or
-   several callers: compare 2 designs first, and run `blast-radius`.
+   several callers: compare 2 designs first, and run `what-could-go-wrong`.
 5. **Failing test first** via `tdd-bug-fix` when a cheap local test exists;
    otherwise keep the repro command as the check.
 6. **Implement** the fix yourself, or hand a tightly scoped brief to a
@@ -35,13 +35,13 @@ not a fix; if evidence refutes it, revert what it motivated.
 7. **Verify** on the original surface: the repro now passes, neighbouring tests
    pass. Wrong-surface or inconclusive is not a pass.
 8. **Review.** Run `code-review` on the diff. For contested or risky fixes,
-   run `interrogate`.
+   run `tear-it-apart`.
 9. **Repeat check.** If this class of bug has happened before, suggest a guard
-   via `correct`. Do not build it unasked.
+   via `never-again`. Do not build it unasked.
 
 ## Do not
 
-Before any branch, commit or PR name, re-read the `ground-rules` section 'Git conventions' (view from that heading; don't rely on a truncated read) and the repo's CONTRIBUTING. The personal rule wins; mention any conflict.
+Use `pr-forge` for branch, commit and PR work (its Git conventions and the repo's CONTRIBUTING apply; the personal rule wins).
 
 Commit, push, open a PR, comment on or transition the Jira ticket unless asked.
 Offer them at the end.

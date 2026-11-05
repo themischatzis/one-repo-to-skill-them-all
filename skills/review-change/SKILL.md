@@ -17,10 +17,10 @@ Read-only. Never post comments, approve or push unless asked.
    template). Check CI status and open review comments.
 4. **Judge.** Correctness against the intent; missing acceptance items;
    edge cases; security; tests that would fail without the change; leftover
-   or unrelated changes; naming against `ground-rules` Git conventions.
+   or unrelated changes; naming against `pr-forge` Git conventions.
 5. **Prove.** Run the tests or reproduce the claim for anything you will call
    a bug. Mark unproven concerns as "unverified". For risky changes, run
-   `blast-radius`; for contested designs, `interrogate`. Use a `code-review`
+   `what-could-go-wrong`; for contested designs, `tear-it-apart`. Use a `code-review`
    subagent as a second pair of eyes on large diffs.
 6. **Report.** Verdict first (ready / needs changes / blocked). Then findings
    ranked by severity, each with `file:line`, why it matters, evidence, and a

@@ -1,9 +1,9 @@
 ---
-name: blast-radius
+name: what-could-go-wrong
 description: Find what a change could break elsewhere before it ships, and prove the one fact it is safe because of by running code. Use for "blast radius of X", "what could this break", or reviewing a small diff you don't trust.
 ---
 
-# Blast radius
+# What could go wrong
 
 Find the breakage grep won't show you. Listing callers is not the job.
 Read-only: report, don't fix.

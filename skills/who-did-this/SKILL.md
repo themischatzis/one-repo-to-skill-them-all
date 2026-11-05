@@ -1,12 +1,12 @@
 ---
-name: why-is-it-like-this
-description: Find out why code is shaped the way it is, using git history, PRs and Jira. Use for "why was this built this way", "who changed this and why", regression history, and before removing something that looks pointless.
+name: who-did-this
+description: Find why code is shaped this way from git history, PRs and Jira. Use for "why was this built this way", "who changed this", regression history, or before removing odd-looking code.
 ---
 
-# Why is it like this
+# Who did this
 
 Recover intent from history, not from guessing. Read-only.
-Companion to `how-does-it-work`.
+Companion to `how-tf`.
 
 ## Steps
 
@@ -32,5 +32,5 @@ Companion to `how-does-it-work`.
 - **Intent**: why it exists, with sources.
 - **Timeline**: the few commits that matter (hash, date, one line each).
 - **Still valid?** Whether the reason still applies.
-- **Safe to change?** What you'd check next; point to `blast-radius` if
+- **Safe to change?** What you'd check next; point to `what-could-go-wrong` if
   the answer is "maybe".

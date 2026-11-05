@@ -1,6 +1,6 @@
 ---
 name: ground-rules
-description: Themis's core engineering principles, condensed. Read before any non-trivial coding task, and whenever bug-hunt, ticket-quest or figure-it-out tells you to. Covers smallest change, root causes, proof, tests, delegation and autonomy.
+description: Themis's core engineering principles. Read before any non-trivial coding task, or when bug-hunt, ticket-quest or figure-it-out says so. Covers smallest change, root causes, proof, autonomy, end-of-task summary.
 ---
 
 # Ground rules
@@ -10,24 +10,7 @@ rule that changed a decision and the choice it changed. Say nothing about the re
 
 ## Choose the skill yourself
 
-Before answering any request, in any mode (plan too), decide which skill fits.
-He talks; you pick. Questions count: a "how", "why", "is this safe" or "review
-this" is a skill trigger, not small talk.
-
-| Request | Skill |
-|---|---|
-| Bug, broken, Jira Bug | `bug-hunt` |
-| Other ticket or feature | `ticket-quest` |
-| How/where does X work | `how-does-it-work` |
-| Why is it like this, who changed it | `why-is-it-like-this` |
-| Review a PR, branch or diff | `review-change` |
-| Rebase, resolve conflicts, merge | `rebase-conflicts` |
-| What could this break | `blast-radius` |
-| Contested design, stress test | `interrogate` |
-| Nothing fits, large or unusual | `figure-it-out` |
-
-Skip heavy skills for trivial changes and say so. Always name the skill you
-used and why.
+Routing lives in `copilot-instructions.md`, which loads every session.
 
 ## Shape of the change
 
@@ -62,7 +45,7 @@ used and why.
 - **Build the lever.** For repetitive or risky work, write the script that does
   or proves it so a reviewer can rerun it.
 - **Encode repeated lessons** as a lint, type or script, not more prose
-  (see `correct`).
+  (see `never-again`).
 - **Guard the context window.** Send bulk reading to subagents and keep
   summaries in the main thread.
 - **Never block on the human for reversible work.** Proceed, show the result.
@@ -76,19 +59,7 @@ used and why.
 - No is an acceptable answer. Push back when the premise is wrong; candour over
   agreement.
 
-## Git conventions
-
-- Check recent branches, commits and the PR template before naming anything.
-  If unsure, ask.
-- Work repo with a ticket: use the ticket's own key. WWP is
-  the usual prefix, but if the ticket has another prefix (e.g. ABC), use that.
-  Branch `type/key-nnnn-slug` (key lowercase); commit and PR title
-  `type(KEY-NNNN): Capital first letter` (key uppercase), even when repo
-  history is lowercase. Work repo but no ticket: use `WWP-0000`.
-- Personal repo (no ticket, no key): branch `type/what-i-am-doing`; commit and
-  PR title `type: Capital first letter`.
-- If SSH push fails, push once over HTTPS with `gh auth git-credential`
-  (`-c credential.helper=...`); change no git config.
+Branch, commit and PR naming lives in `pr-forge`.
 
 ## End-of-task summary
 

@@ -1,8 +1,10 @@
 # A bug's unexpected journey
 
-Turn "it's broken" into a useful Jira **Bug**, not an epic saga.
-The [skill instructions](SKILL.md) keep the report structured and stop the
-assistant from inventing facts to fill the parchment.
+Turn "it's broken" into a useful Jira **Bug**, not an epic saga (one does not
+simply file a ticket into Mordor). The [skill instructions](SKILL.md) keep the
+report structured and stop the assistant from inventing facts to fill the
+parchment. It runs the text through [unslop](../unslop/README.md) first, and
+feeds [bug-hunt](../bug-hunt/README.md) and [tdd-bug-fix](../tdd-bug-fix/README.md).
 
 ## Before setting off
 

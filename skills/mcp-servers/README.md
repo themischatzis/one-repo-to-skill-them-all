@@ -1,7 +1,8 @@
 # The palantir connections
 
-Skills tell the assistant how to do a quest. MCP servers let it reach the
-outside world. Neither is permission to summon tickets without asking.
+Skills tell the assistant how to do a quest. MCP servers are the seeing-stones
+that let it reach the outside world. Neither is permission to summon tickets
+without asking, and no stone should be gazed into unattended.
 
 ## Recorded setup
 

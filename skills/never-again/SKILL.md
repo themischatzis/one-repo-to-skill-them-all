@@ -1,9 +1,9 @@
 ---
-name: correct
+name: never-again
 description: Turn repeated agent or reviewer corrections in a repo into structural guards. Use when told the same mistake keeps happening, after being corrected twice for the same thing, or when asked to make a mistake impossible.
 ---
 
-# Correct
+# Never again
 
 Change the repo so the next contributor can't repeat the mistake.
 

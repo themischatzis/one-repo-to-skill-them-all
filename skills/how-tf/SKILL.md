@@ -1,9 +1,9 @@
 ---
-name: how-does-it-work
+name: how-tf
 description: Explain how a subsystem, feature or code path works, or where something should live, before changing it. Use for "how does X work", walkthroughs, onboarding, and placement/ownership questions. Read-only.
 ---
 
-# How does it work
+# How tf
 
 Produce the explanation a senior engineer would give to someone onboarding:
 enough for a working mental model, not annotated source. Read-only.

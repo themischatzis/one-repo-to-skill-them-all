@@ -1,9 +1,9 @@
 ---
-name: interrogate
-description: Adversarial review where independent subagents try to break a change or design, and only findings proven by a run survive. Use for "interrogate", "tear this apart", "stress test this", "find blind spots", or before shipping a contested design. Reports findings, does not fix.
+name: tear-it-apart
+description: Adversarial review: subagents try to break a change or design; only run-proven findings survive. Use for "tear it apart", "interrogate", "stress test this", "find blind spots". Reports, does not fix.
 ---
 
-# Interrogate
+# Tear it apart
 
 Adversaries try to break a change. A finding survives only if a run proves it.
 Report; do not fix.
@@ -25,7 +25,7 @@ Launch 3 subagents in parallel with the scope, the intent and this brief:
 
 Give each a different angle so they don't duplicate: (1) correctness and edge
 cases, (2) concurrency, failure, security and input handling, (3) what else in
-the system depends on it (`blast-radius`). Use a `general-purpose` agent for
+the system depends on it (`what-could-go-wrong`). Use a `general-purpose` agent for
 these; add a `rubber-duck` pass on the design itself if it is contested.
 
 ## Verify

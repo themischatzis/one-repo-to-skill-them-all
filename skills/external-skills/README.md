@@ -1,7 +1,7 @@
 # The borrowed fellowship
 
-Not every skill was forged here. Some arrived with a ponytail and strong
-opinions about your abstraction layer.
+Not every member of the company was forged here. Some wandered in from
+elsewhere with a ponytail and strong opinions about your abstraction layer.
 
 ## Recorded external collection
 
@@ -61,7 +61,7 @@ copilot plugin update ponytail@ponytail
 
 Review upstream changes before updating; this guide does not pin a version.
 
-## Not external installs
+## Not external installs (forged in this repository)
 
 `create-jira-bug`, `external-skills`, and `mcp-servers` are this repository's
 personal skills. Their installation is covered in the
