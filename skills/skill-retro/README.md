@@ -1,8 +1,22 @@
 # The palantír log
 
 Journals how you work and, a week later, reviews every skill against it plus
-your past Copilot sessions: keep, change, delete, add.
+your past Copilot sessions: keep, change, delete, add. Unlike the real
+palantíri, it only shows true things and does not lure you to Mordor.
 The [skill instructions](SKILL.md) have the detail.
+
+## Reflect, Mirror and Trial
+
+- **Reflect**: say "reflect" after a session that taught something. Three
+  read-only reviewers (judgment, tooling, divergent) via
+  [divide-and-conquer](../divide-and-conquer/README.md) feed an Accepted,
+  Rejected and Backlog list, and nothing is edited until you approve. Backlog
+  items go to [never-again](../never-again/README.md).
+- **Mirror**: say "what are my patterns" for a monthly look in the water. It
+  mines the journal and sessions, asks which patterns are really you, and only
+  then proposes edits to [ground-rules](../ground-rules/README.md).
+- **Trial**: after a big skill edit or an adopted skill, it offers
+  [trial-by-fire](../trial-by-fire/README.md) before you keep it.
 
 ## Setup
 

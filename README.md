@@ -12,22 +12,41 @@ No rings, no prophecies, no framework. Just Markdown with a purpose.
 
 | Skill | Its quest |
 |---|---|
-| [create-jira-bug](skills/create-jira-bug/README.md) | Turn "it's broken" into a useful Jira bug, with context, impact, reproduction steps, and expected behaviour. |
-| [external-skills](skills/external-skills/README.md) | Remember which skills were borrowed, where they came from, and how to invite them back. |
-| [mcp-servers](skills/mcp-servers/README.md) | Reconnect the palantirs: MCP servers, authentication, and setup instructions. |
-| [ground-rules](skills/ground-rules/README.md) | The shared principles every playbook reads first. |
+| [babysit-pr](skills/babysit-pr/README.md) | Watch a PR through conflicts, reviews and CI until merge-ready. |
 | [bug-hunt](skills/bug-hunt/README.md) | Reproduce, root-cause, test-first fix and verify a bug. |
-| [ticket-quest](skills/ticket-quest/README.md) | Deliver a Jira ticket in small verified units. |
-| [how-does-it-work](skills/how-does-it-work/README.md) | Cited explanations of how code works. |
-| [why-is-it-like-this](skills/why-is-it-like-this/README.md) | History and intent behind the code. |
-| [review-change](skills/review-change/README.md) | Review a PR, branch or diff against its intent, with proven findings. |
-| [rebase-conflicts](skills/rebase-conflicts/README.md) | Rebase a branch and resolve conflicts safely and repeatably. |
-| [interrogate](skills/interrogate/README.md) | Adversarial review where only run-proven findings survive. |
+| [catch-me-up](skills/catch-me-up/README.md) | Plain-words catch-up: what changed and what waits on you. |
+| [compare-designs](skills/compare-designs/README.md) | Competing attempts, judged blind, best parts merged (opt-in). |
+| [create-jira-bug](skills/create-jira-bug/README.md) | Turn "it's broken" into a useful Jira bug, with context, impact, reproduction steps, and expected behaviour. |
+| [divide-and-conquer](skills/divide-and-conquer/README.md) | Parallel subagents over independent slices (opt-in). |
+| [external-skills](skills/external-skills/README.md) | Remember which skills were borrowed, where they came from, and how to invite them back. |
 | [figure-it-out](skills/figure-it-out/README.md) | Design a playbook for large or unusual work. |
+| [ground-rules](skills/ground-rules/README.md) | The shared principles every playbook reads first. |
+| [how-tf](skills/how-tf/README.md) | Cited explanations of how code works. |
+| [mcp-servers](skills/mcp-servers/README.md) | Reconnect the palantirs: MCP servers, authentication, and setup instructions. |
+| [never-again](skills/never-again/README.md) | Turn repeated corrections into guards. |
+| [pr-forge](skills/pr-forge/README.md) | Small ordered commits and a briefing-style PR, with your naming rules. |
+| [review-change](skills/review-change/README.md) | Review a PR, branch or diff against its intent, with proven findings. |
+| [skill-retro](skills/skill-retro/README.md) | Journal how you work, reflect on sessions and review the skills against it. |
 | [tdd-bug-fix](skills/tdd-bug-fix/README.md) | Fix bugs test-first when the test is cheap. |
-| [blast-radius](skills/blast-radius/README.md) | Find what a change breaks elsewhere and prove the key safety fact. |
-| [correct](skills/correct/README.md) | Turn repeated corrections into guards. |
-| [skill-retro](skills/skill-retro/README.md) | Journal how you work and review the skills against it. |
+| [tear-it-apart](skills/tear-it-apart/README.md) | Adversarial review where only run-proven findings survive. |
+| [ticket-quest](skills/ticket-quest/README.md) | Deliver a Jira ticket in small verified units. |
+| [trial-by-fire](skills/trial-by-fire/README.md) | Blind test of a skill change. |
+| [try-harder](skills/try-harder/README.md) | Make a vague task deeper before work starts. |
+| [unslop](skills/unslop/README.md) | Plain prose for PRs, Jira, READMEs and skills, minus AI tells. |
+| [untangle-this](skills/untangle-this/README.md) | Rebase a branch and resolve conflicts safely and repeatably. |
+| [what-could-go-wrong](skills/what-could-go-wrong/README.md) | Find what a change breaks elsewhere and prove the key safety fact. |
+| [what-were-you-thinking](skills/what-were-you-thinking/README.md) | A decision log for long or unattended runs. |
+| [where-was-i](skills/where-was-i/README.md) | Pause cleanly, pick up a session, recall where you left off. |
+| [who-did-this](skills/who-did-this/README.md) | History and intent behind the code. |
+
+### Agents
+
+| Agent | Its quest |
+|---|---|
+| [gollum](agents/gollum/README.md) | Hates unnecessary comments with his whole heart. |
+| [sam](agents/sam/README.md) | A loyal delegate that carries the edits. |
+
+Run `/agent` to confirm they are listed.
 
 Rebuilding the laptop? Start with the
 [external skills guide](skills/external-skills/README.md) and
@@ -47,6 +66,21 @@ for s in skills/*/; do
   n=$(basename "$s")
   [ -e "$HOME/.copilot/skills/$n" ] || ln -s "$PWD/skills/$n" "$HOME/.copilot/skills/$n"
 done
+
+mkdir -p "$HOME/.copilot/agents"
+for a in agents/*/*.agent.md; do
+  n=$(basename "$a")
+  [ -e "$HOME/.copilot/agents/$n" ] || ln -s "$PWD/$a" "$HOME/.copilot/agents/$n"
+done
+```
+
+Then link the always-on routing file, so Copilot picks the right skill or agent
+from a plain request in every repo. It only links if none exists yet; if you
+already have a `~/.copilot/copilot-instructions.md`, merge by hand.
+
+```sh
+[ -e "$HOME/.copilot/copilot-instructions.md" ] || \
+  ln -s "$PWD/copilot-instructions.md" "$HOME/.copilot/copilot-instructions.md"
 ```
 
 If that destination already exists, inspect it first; don't overwrite your

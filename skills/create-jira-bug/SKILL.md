@@ -111,6 +111,8 @@ other evidence demonstrates the issue instead.
 
 ## Create and confirm
 
+0. Before creating, run the title and description through `unslop`.
+
 1. Confirm the required intake answers have been received, then create a Bug
    in the resolved project with the title, formatted description, required
    fields, and confirmed epic/parent (unless Jira allows an explicit no-parent

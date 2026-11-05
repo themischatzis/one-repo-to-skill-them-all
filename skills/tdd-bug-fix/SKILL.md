@@ -1,6 +1,6 @@
 ---
 name: tdd-bug-fix
-description: Fix a bug test-first when there is a cheap, obvious test target. Use when asked for TDD, a regression test, or a failing test first, or when fixing a bug (e.g. from a Jira ticket) that a small unit test can reproduce. Skip when the test path is expensive or unclear.
+description: Fix a bug test-first when a cheap, obvious test target exists. Use for TDD, a regression test, or a failing test first. Skip when the test path is expensive or unclear.
 ---
 
 # TDD bug fix

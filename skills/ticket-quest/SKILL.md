@@ -1,6 +1,6 @@
 ---
 name: ticket-quest
-description: End-to-end playbook for delivering a Jira ticket or feature request - understand, design small, build in verifiable units, review and prove. Use for "work on this ticket", "implement PROJ-123", "build this", or any non-bug change.
+description: Deliver a Jira ticket or feature in small verified units. Use for "work on this ticket", "implement PROJ-123", "build this", or any non-bug change.
 ---
 
 # Ticket quest
@@ -18,8 +18,8 @@ multi-day work.
    being solved, and the smallest change you expect. List acceptance criteria
    as a checklist; ask only about genuine product calls, not facts you can
    observe.
-2. **Understand the area** with `how-does-it-work`, and
-   `why-is-it-like-this` if you plan to change existing behaviour.
+2. **Understand the area** with `how-tf`, and
+   `who-did-this` if you plan to change existing behaviour.
 3. **Name the data shape** and pick its structure (table, state machine,
    typed model). For a decision that is hard to reverse, get two competing
    designs from parallel subagents and choose; say why.
@@ -31,8 +31,8 @@ multi-day work.
    success criteria; review their diffs.
 6. **Verify** each unit, then the whole against the acceptance checklist on the
    real surface (run it, hit the endpoint, open the page).
-7. **Review.** `blast-radius` on the change; `code-review` on the diff;
-   `interrogate` if the design was contested.
+7. **Review.** `what-could-go-wrong` on the change; `code-review` on the diff;
+   `tear-it-apart` if the design was contested.
 8. **Retro Q&A.** Use `ask_user` for 3-4 short questions: what was unclear in
    the ticket, which decision he would have made differently, what review
    found that the build should have caught, what to do next time. Log the
@@ -48,7 +48,7 @@ stop and say so. Don't introduce a new way of doing something the repo already
 does: find how it does it (where values, config, state and data come from) and
 follow that.
 
-Before any branch, commit or PR name, re-read the `ground-rules` section 'Git conventions' (view from that heading; don't rely on a truncated read) and the repo's CONTRIBUTING. The personal rule wins; mention any conflict.
+Use `pr-forge` for branch, commit and PR work (its Git conventions and the repo's CONTRIBUTING apply; the personal rule wins).
 
 Commit, push, branch, open a PR, comment on or transition the ticket unless asked.
 Don't add scope the ticket didn't ask for; note it as a follow-up.
