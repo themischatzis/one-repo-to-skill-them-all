@@ -10,6 +10,11 @@
 - Custom agents go in `agents/<name>/<name>.agent.md` with a `README.md` beside
   them, like skills. Keep the `description` short and plain; jokes and theme
   belong in the README only.
+- Agents you start yourself go in `agents/`. Roles that Gandalf starts as his
+  team go in `roles/<name>/<name>.agent.md` with a `README.md`. Every agent and
+  role needs a guard hook and a row in `guard/guard.py`.
+- Role files keep one fixed layout: Specialization, Work style, Rules. The guard
+  and report rules live inside Rules.
 - Every new, renamed or removed skill or agent needs a row change in the
   routing table in `copilot-instructions.md`; that file is how plain requests
   reach the right skill.

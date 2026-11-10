@@ -43,8 +43,21 @@ No rings, no prophecies, no framework. Just Markdown with a purpose.
 
 | Agent | Its quest |
 |---|---|
+| [gandalf](agents/gandalf/README.md) | The orchestrator: plans, asks, then runs the roles under guard. |
 | [gollum](agents/gollum/README.md) | Hates unnecessary comments with his whole heart. |
 | [sam](agents/sam/README.md) | A loyal delegate that carries the edits. |
+
+Gandalf's roles live in [roles/](roles/README.md) and are the team he starts (each guarded
+by the [guard](guard/README.md)):
+[adversary](roles/adversary/README.md), [analyst](roles/analyst/README.md),
+[architect](roles/architect/README.md), [backend](roles/backend/README.md),
+[ci-fixer](roles/ci-fixer/README.md), [devops](roles/devops/README.md),
+[docs](roles/docs/README.md), [frontend](roles/frontend/README.md),
+[manager](roles/manager/README.md), [ml-engineer](roles/ml-engineer/README.md),
+[prompt-engineer](roles/prompt-engineer/README.md), [qa](roles/qa/README.md),
+[resolver](roles/resolver/README.md), [retrieval](roles/retrieval/README.md),
+[reviewer](roles/reviewer/README.md), [security](roles/security/README.md),
+[visionary](roles/visionary/README.md), [vp](roles/vp/README.md).
 
 Run `/agent` to confirm they are listed.
 
@@ -68,11 +81,20 @@ for s in skills/*/; do
 done
 
 mkdir -p "$HOME/.copilot/agents"
-for a in agents/*/*.agent.md; do
+for a in agents/*/*.agent.md roles/*/*.agent.md; do
   n=$(basename "$a")
   [ -e "$HOME/.copilot/agents/$n" ] || ln -s "$PWD/$a" "$HOME/.copilot/agents/$n"
 done
 ```
+
+Gandalf, his roles, `sam` and `gollum` all need the [guard](guard/README.md). Read
+`guard/guard.py`, then link it:
+
+```sh
+[ -e "$HOME/.copilot/guard" ] || ln -s "$PWD/guard" "$HOME/.copilot/guard"
+```
+
+For parallel work, [scripts](scripts/README.md) has a worktree helper.
 
 Then link the always-on routing file, so Copilot picks the right skill or agent
 from a plain request in every repo. It only links if none exists yet; if you
@@ -116,3 +138,7 @@ information.
 Commit and PR titles use `feat: Capitalized title`, for example
 `feat: Add Jira bug reporting skill`. No ticket prefixes: this is a personal
 repo, not the Council of Mandatory Tracking Numbers.
+
+## Inspired by
+
+[Bernstein](https://github.com/sipyourdrink-ltd/bernstein) and [pstack](https://github.com/cursor/plugins/tree/main/pstack).
