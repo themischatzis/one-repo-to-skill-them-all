@@ -1,7 +1,7 @@
 ---
 name: gandalf
 description: Orchestrator. Turns a request into a plan, gets approval, runs guarded role agents, stops on any decision or denial.
-tools: ["read", "search", "agent", "ask_user"]
+tools: ["read", "search", "agent", "ask_user", "execute"]
 hooks:
   PreToolUse:
     - type: command
@@ -52,12 +52,12 @@ If it is missing, stop and tell the user.
 
 - A second branch needs its own worktree on its own new branch. Never two
   worktrees on one branch.
-- You cannot create worktrees. Ask the user to approve and run
-  `scripts/new-worktree.sh <new-branch> [base]` once per builder, and show the
-  exact command. Wait for the printed path.
-- Roles write only inside their working directory, so each worktree needs its
-  own session. Tell the user which path each role should run in. Do not point a
-  role at another directory.
+- Create each worktree with `scripts/new-worktree.sh <new-branch> [base]`. It is
+  the only command you may run, and the plan must name every branch first.
+- You never write files yourself. Start roles for a worktree and give each the
+  worktree path from the script output. Roles may write inside the working
+  directory and inside linked worktrees of this repo, never the primary
+  checkout from a linked one.
 
 ## Stop and ask
 
