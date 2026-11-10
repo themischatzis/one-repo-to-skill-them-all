@@ -14,7 +14,7 @@ Run it from inside the repo:
 scripts/new-worktree.sh feat/my-change
 ```
 
-Each extra branch gets its own worktree on its own new branch, and its own
-Copilot session started in that folder. [Gandalf](../agents/gandalf/README.md)
-will ask you to run it. When done, remove a worktree with
+Each extra branch gets its own worktree on its own new branch.
+[Gandalf](../agents/gandalf/README.md) runs this script himself, then starts
+roles that write in the new worktree. When done, remove a worktree with
 `git worktree remove <path>`.

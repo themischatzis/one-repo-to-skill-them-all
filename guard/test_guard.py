@@ -193,6 +193,12 @@ CASES = [
     ("backend", {"tool_name": "Read", "tool_input": {"path": 5}}, True),
     ("backend", {"tool_name": "Read", "tool_input": "x"}, True),
     ("gandalf", {"tool_name": "task", "tool_input": {"agent_type": "general-purpose"}}, True),
+    ("gandalf", bash("scripts/new-worktree.sh feat/x"), False),
+    ("gandalf", bash("scripts/new-worktree.sh feat/x main"), False),
+    ("gandalf", bash("scripts/new-worktree.sh -x"), True),
+    ("gandalf", bash("scripts/new-worktree.sh feat/x; git push"), True),
+    ("gandalf", bash("ls"), True),
+    ("gandalf", write("a.txt"), True),
     ("analyst", {"tool_name": "WebFetch", "tool_input": {"url": "https://2130706433/"}}, True),
     ("analyst", {"tool_name": "WebFetch", "tool_input": {"url": "https://[::ffff:127.0.0.1]/"}}, True),
 ]
@@ -216,6 +222,21 @@ class GuardTest(unittest.TestCase):
         self.assertTrue(results[-1])
         self.assertFalse(guard.over_budget("backend", "s2", d))
         self.assertFalse(guard.over_budget("backend", "a/b", d) or guard.over_budget("backend", "a_b", d))
+
+    def test_writes_reach_linked_worktrees_but_not_the_primary(self):
+        top = os.path.realpath(tempfile.mkdtemp())
+        main, linked = os.path.join(top, "main"), os.path.join(top, "linked")
+        run = lambda *a, cwd=main: subprocess.run(["git", *a], cwd=cwd, check=True, capture_output=True)
+        os.mkdir(main)
+        run("init", "-q")
+        run("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "--allow-empty", "-m", "x")
+        run("worktree", "add", "-q", "-b", "other", linked)
+        to_linked = {**write(os.path.join(linked, "a.txt")), "cwd": main}
+        to_main = {**write(os.path.join(main, "a.txt")), "cwd": linked}
+        self.assertIsNone(guard.check("backend", to_linked))
+        self.assertIsNotNone(guard.check("backend", to_main))
+        self.assertIsNotNone(guard.check("backend", {**write(os.path.join(top, "x.txt")), "cwd": main}))
+        self.assertIsNotNone(guard.check("backend", {**write(os.path.join(linked, ".git")), "cwd": main}))
 
     def test_missing_session_id_is_denied(self):
         event = {**bash("ls"), "cwd": CWD}

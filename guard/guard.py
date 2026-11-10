@@ -12,6 +12,7 @@ import json
 import os
 import re
 import shlex
+import subprocess
 import sys
 import tempfile
 import time
@@ -110,6 +111,16 @@ def inside(path, cwd):
     return path == cwd or path.startswith(cwd + os.sep)
 
 
+def worktrees(cwd):
+    """Linked worktrees of cwd's repo. The first listed is the primary checkout, so it is left out."""
+    try:
+        out = subprocess.run(["git", "worktree", "list", "--porcelain"], cwd=cwd, capture_output=True,
+                             text=True, timeout=3).stdout
+    except (OSError, subprocess.SubprocessError):
+        return []
+    return [os.path.realpath(line[9:]) for line in out.splitlines() if line.startswith("worktree ")][1:]
+
+
 def path_problem(path, cwd, write, scope=None):
     """Why a file path is off limits, or None."""
     real = resolve(path, cwd)
@@ -118,11 +129,12 @@ def path_problem(path, cwd, write, scope=None):
     if COPILOT_HOME.search(real) and (write or "/.copilot/skills/" not in real):
         return "Copilot's own config is off limits"
     if write:
-        if not inside(real, cwd):
-            return f"{path} is outside the working directory"
-        if ".git" in os.path.relpath(real, cwd).split(os.sep):
+        root = cwd if inside(real, cwd) else next((w for w in worktrees(cwd) if inside(real, w)), None)
+        if root is None:
+            return f"{path} is outside the working directory and its worktrees"
+        if ".git" in os.path.relpath(real, root).split(os.sep):
             return "writing inside .git is not allowed"
-        if scope and not any(glob_re(g).match(os.path.relpath(real, cwd)) for g in scope):
+        if scope and not any(glob_re(g).match(os.path.relpath(real, root)) for g in scope):
             return f"{path} is outside this role's write scope"
     return None
 
@@ -279,6 +291,8 @@ def check_shell(command, cwd, may_write):
     return None
 
 
+NEW_WORKTREE = re.compile(r"scripts/new-worktree\.sh [A-Za-z0-9][A-Za-z0-9._/-]*( [A-Za-z0-9][A-Za-z0-9._/~^-]*)?\Z")
+
 TOOL_ALIASES = {
     "bash": "Bash", "shell": "Bash", "powershell": "Bash",
     "write": "Write", "edit": "Write", "multiedit": "Write", "notebookedit": "Write", "create": "Write",
@@ -301,6 +315,10 @@ def check(role, event):
     path = args.get("path") or args.get("file_path")
     if path is not None and not isinstance(path, str):
         return "the path is not a string"
+    if tool == "Bash" and cls == "orchestrate":
+        if not NEW_WORKTREE.match(str(args.get("command", ""))):
+            return "Gandalf may only run scripts/new-worktree.sh <new-branch> [base]"
+        return None
     if tool == "Bash":
         if cls not in ("inspect", "build"):
             return "this role has no shell"
@@ -330,7 +348,7 @@ def check(role, event):
     return None
 
 
-MAX_CALLS = 500
+MAX_CALLS = 200
 MAX_DENIALS = 10
 STATE_DIR = os.path.join(tempfile.gettempdir(), "gandalf-guard")
 

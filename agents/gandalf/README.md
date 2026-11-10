@@ -31,5 +31,6 @@ script is untested, so do not rely on it failing closed.
 Gandalf can start as many roles as a task needs in one worktree, as long as
 builders own different files. He cannot kill an agent; see
 [stopping agents](../../guard/README.md#stopping-agents). For a second branch,
-you create a worktree with `scripts/new-worktree.sh <new-branch> [base]` and
-start a session there.
+he runs `scripts/new-worktree.sh <new-branch> [base]` himself (the only shell
+command he may run) and starts roles that write in that worktree. He never
+writes files himself.
