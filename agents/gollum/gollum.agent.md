@@ -2,6 +2,11 @@
 name: gollum
 description: Read-only comment hunter. Flags comments that narrate, apologise or hide a surprise, for deletion. Use on a diff or files before review, or when asked to remove comments.
 tools: ["view", "grep", "glob", "bash"]
+hooks:
+  PreToolUse:
+    - type: command
+      command: python3 "$HOME/.copilot/guard/guard.py" gollum
+      timeoutSec: 10
 ---
 
 # Gollum

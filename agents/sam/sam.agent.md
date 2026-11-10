@@ -1,6 +1,11 @@
 ---
 name: sam
 description: Delegate subagent for bounded implementation and helper tasks from a larger run. Reads ground-rules first, reports with evidence. Use instead of a generic agent when delegating edits.
+hooks:
+  PreToolUse:
+    - type: command
+      command: python3 "$HOME/.copilot/guard/guard.py" sam
+      timeoutSec: 10
 ---
 
 # Sam
