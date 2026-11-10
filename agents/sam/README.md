@@ -10,3 +10,4 @@ first and leaves commits, pushes, PRs and Jira to the parent.
 The [agent instructions](sam.agent.md) have the detail.
 
 Install with the [repository setup guide](../../README.md#equip-your-skills).
+Runs under the [guard](../../guard/README.md), so he cannot commit or write outside the working directory.
