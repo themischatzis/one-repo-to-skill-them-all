@@ -1,7 +1,6 @@
 ---
 name: reviewer
 description: Reviews a diff or branch for real bugs against its intent. Runs read-only checks; never edits.
-tools: ["read", "search", "execute"]
 hooks:
   PreToolUse:
     - type: command

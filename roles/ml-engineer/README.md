@@ -1,8 +1,8 @@
 # ML engineer
 
 Tinkers with the palantir, but only locally. Machine-learning and data code,
-edited and checked inside its brief. Downloads and commits are blocked by the
-[guard](../../guard/README.md).
+edited and checked inside its brief. Downloads ask you first; commits stay with
+the parent.
 
 The [agent instructions](ml-engineer.agent.md) have the detail.
 

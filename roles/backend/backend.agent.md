@@ -1,7 +1,6 @@
 ---
 name: backend
 description: Server-side code in WordPress/PHP (wp*), Node or Java. Edits and runs tests inside its brief; never commits.
-tools: ["read", "search", "edit", "execute"]
 hooks:
   PreToolUse:
     - type: command

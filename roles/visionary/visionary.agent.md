@@ -1,7 +1,6 @@
 ---
 name: visionary
 description: Explores where a product or codebase could go next, from the code and public sources. Read-only.
-tools: ["read", "search", "web"]
 hooks:
   PreToolUse:
     - type: command

@@ -1,8 +1,8 @@
 # Resolver
 
 Settles disputes at the Council of Elrond. Resolves merge-conflict markers by
-hand, reading both sides' intent. It cannot run git mutations; the parent
-finishes the rebase. Limits enforced by the [guard](../../guard/README.md).
+hand, reading both sides' intent. It leaves git mutations to the parent, who
+finishes the rebase.
 
 The [agent instructions](resolver.agent.md) have the detail.
 

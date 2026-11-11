@@ -1,7 +1,6 @@
 ---
 name: prompt-engineer
 description: Writes and tightens prompts, skills and agent instructions. Edits inside its brief; never commits.
-tools: ["read", "search", "edit", "execute"]
 hooks:
   PreToolUse:
     - type: command

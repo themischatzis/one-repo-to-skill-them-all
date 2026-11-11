@@ -1,7 +1,6 @@
 ---
 name: architect
 description: Proposes structure and weighs tradeoffs for a change. Read-only; reports options.
-tools: ["read", "search"]
 hooks:
   PreToolUse:
     - type: command

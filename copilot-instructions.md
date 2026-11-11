@@ -34,8 +34,8 @@ PR number or URL, explicit words, then topic.
 | Competing designs (only if asked) | `compare-designs` |
 
 Agents: edits to `sam`; comment cleanup on a diff to `gollum`. Multi-role work
-(plan, then run BE/FE/QA and others under guard) to `gandalf`, who asks before
-acting and starts the role agents (adversary, analyst, architect, backend,
+(plan, then run BE/FE/QA and others) to `gandalf`, who asks before
+acting and picks any role or built-in agent (adversary, analyst, architect, backend,
 ci-fixer, devops, docs, frontend, manager, ml-engineer, prompt-engineer, qa,
 resolver, retrieval, reviewer, security, visionary, vp).
 

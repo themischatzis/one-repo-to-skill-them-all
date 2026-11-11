@@ -2,7 +2,6 @@
 
 Knows the right words to open the door at Moria. Writes and tightens prompts,
 skills and agent instructions, and tests them against at least three inputs.
-Limits enforced by the [guard](../../guard/README.md).
 
 The [agent instructions](prompt-engineer.agent.md) have the detail.
 

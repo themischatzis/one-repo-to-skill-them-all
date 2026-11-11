@@ -1,7 +1,6 @@
 ---
 name: frontend
 description: Client-side code in React and TypeScript. Edits and runs tests inside its brief; never commits.
-tools: ["read", "search", "edit", "execute"]
 hooks:
   PreToolUse:
     - type: command

@@ -1,7 +1,6 @@
 ---
 name: vp
 description: Judges priorities and gives a go or no-go on a plan. Read-only; reports a decision memo.
-tools: ["read", "search"]
 hooks:
   PreToolUse:
     - type: command

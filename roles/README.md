@@ -27,6 +27,6 @@ plans for and starts as subagents, each with a narrow job and its own
 
 Each role is `roles/<name>/<name>.agent.md` plus a README. They are ordinary
 user-level agents, so `/agent` lists them, but they are meant to be started by
-Gandalf. A new role also needs a row in `guard/guard.py`.
+Gandalf. A new role also needs its name in `ROLES` in `guard/guard.py`.
 
 Install with the [repository setup guide](../README.md#equip-your-skills).

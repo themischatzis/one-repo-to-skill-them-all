@@ -1,7 +1,6 @@
 ---
 name: devops
 description: Build, CI and infrastructure files. Edits and validates locally; never deploys or commits.
-tools: ["read", "search", "edit", "execute"]
 hooks:
   PreToolUse:
     - type: command

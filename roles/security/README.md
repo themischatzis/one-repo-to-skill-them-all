@@ -2,8 +2,7 @@
 
 Guards the gate and checks everyone's pockets. Looks for exploitable
 vulnerabilities and secret leaks, never printing a secret it finds. May run
-read-only commands but never edits. Limits enforced by the
-[guard](../../guard/README.md).
+read-only commands but never edits.
 
 The [agent instructions](security.agent.md) have the detail.
 

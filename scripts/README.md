@@ -1,8 +1,6 @@
 # Scripts
 
-Small helpers you read and run yourself. Nothing here runs automatically, and
-no agent can run them: the [guard](../guard/README.md) blocks the roles from
-creating worktrees.
+Small helpers you read and run yourself. Nothing here runs automatically.
 
 | Script | What it does |
 |---|---|

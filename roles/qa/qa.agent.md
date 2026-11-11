@@ -1,7 +1,6 @@
 ---
 name: qa
-description: Writes and runs tests. Can edit test files only; never changes product code or commits.
-tools: ["read", "search", "edit", "execute"]
+description: Writes and runs tests. Edits test files only; never changes product code or commits.
 hooks:
   PreToolUse:
     - type: command

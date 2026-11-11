@@ -4,13 +4,15 @@
 fellowship set off.
 
 Talk to Gandalf and he drafts a plan: which role does what, in what order, and
-how each step is proved. He asks you to approve it, runs the roles as
-subagents, reports after every step, and stops at anything shady. He asks at
+how each step is proved. He asks you to approve it, starts the agents the task
+needs as subagents, reports after every step, and stops at anything shady. He asks at
 every decision and never assumes. Commits, pushes and PRs go back to you via
 [pr-forge](../../skills/pr-forge/README.md).
 
-He can read, search, ask you and start subagents. He cannot edit or run shell
-commands. A [guard](../../guard/README.md) hook enforces that.
+He has every tool: read, search, edit, shell, ask you and start subagents. He
+picks the agents a task needs himself, from the roles below, `sam` and `gollum`,
+or a built-in such as `explore`, and passes each one the context it needs in
+its brief. A [guard](../../guard/README.md) hook still applies.
 
 The [agent instructions](gandalf.agent.md) have the detail. Roles he can call
 (in [roles/](../../roles)):
@@ -32,12 +34,9 @@ Gandalf can start as many roles as a task needs in one worktree, as long as
 builders own different files. He cannot kill an agent; see
 [stopping agents](../../guard/README.md#stopping-agents). For a second branch,
 he runs `scripts/new-worktree.sh <new-branch> [base]` himself and starts roles
-that write in that worktree. Gandalf can also edit files and run shell commands
-under the builder checks, plus `git add/commit/push/switch/fetch/stash` and
-`gh pr/issue create/comment/edit`. Deleting files inside the working directory
-is free. He has to ask you (a prompt you answer) for merge, rebase, reset,
-checkout, pull, `gh pr merge/close`, curl and wget, deleting or writing outside
-the working directory, and starting any agent that is not one of his roles.
-Remote deletes and force-push are blocked outright. In autopilot the prompt
-cannot show, so those calls are denied.
+that write in that worktree. He also runs `git` and `gh` himself. Merging is
+the one thing he cannot do: `git merge`, `gh pr merge` and merge calls through
+`gh api` ask you first, and `sudo` is denied. Other sensitive commands (curl,
+wget, ssh, cloud CLIs, deploys, publishing) ask you too. In autopilot the
+prompt cannot show, so those calls are denied.
 Commits and pushes still hit Copilot's normal permission prompt.

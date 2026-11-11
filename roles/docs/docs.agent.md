@@ -1,7 +1,6 @@
 ---
 name: docs
 description: Writes and updates documentation. Can edit Markdown and docs/ only; never commits.
-tools: ["read", "search", "edit", "execute"]
 hooks:
   PreToolUse:
     - type: command

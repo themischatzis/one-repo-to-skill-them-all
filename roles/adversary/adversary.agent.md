@@ -1,7 +1,6 @@
 ---
 name: adversary
 description: Last-pass attacker on a design or diff. Finds reasons it should not ship. Read-only; reports findings.
-tools: ["read", "search"]
 hooks:
   PreToolUse:
     - type: command
