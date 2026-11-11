@@ -23,7 +23,6 @@ ROLES = {
     "ci-fixer", "resolver", "qa", "docs", "sam", "gollum", "gandalf",
 }
 ORCH = "gandalf"
-RESEARCH = {"analyst", "visionary"}
 
 SECRET = re.compile(r"""(?:^|[/\s='"])(?:
     \.env(?:\.(?!(?:example|sample|template)\b)[\w.-]+)?(?![\w.-])
@@ -194,13 +193,20 @@ def check(role, event):
     if role not in ROLES:
         return "unknown role"
     orch = role == ORCH
-    args = event.get("tool_input") or {}
-    if not isinstance(args, dict):
-        return "the tool input is not an object"
-    tool = TOOL_ALIASES.get(str(event.get("tool_name", "")).lower(), "")
+    name = str(event.get("tool_name", "")).lower()
+    tool = TOOL_ALIASES.get(name, "")
     cwd = os.path.realpath(event.get("cwd") or ".")
+    args = event.get("tool_input")
     if TOKENS.search(json.dumps(args)):
         return "the tool input contains a secret-looking value"
+    if tool == "Write" and isinstance(args, str):
+        paths = re.findall(r"(?m)^\*\*\* (?:Add File|Update File|Delete File|Move to): (.+)$", args)
+        if not paths or not args.startswith("*** Begin Patch\n") or not args.rstrip().endswith("*** End Patch"):
+            return "the patch has no checkable file operations"
+        return next((p for path in paths if (p := path_problem(path, cwd, True))), None)
+    args = args or {}
+    if not isinstance(args, dict):
+        return f"the {name} tool input is not an object ({type(args).__name__})"
     path = args.get("path") or args.get("file_path")
     if path is not None and not isinstance(path, str):
         return "the path is not a string"
@@ -212,15 +218,17 @@ def check(role, event):
     if tool in ("Write", "Read") and path:
         return path_problem(path, cwd, tool == "Write")
     if tool in ("WebFetch", "WebSearch"):
-        if role not in RESEARCH:
-            return "this role has no web access"
         url = urlparse(str(args.get("url", "")))
         host = url.hostname or ""
         if tool == "WebFetch" and (url.scheme != "https" or "@" in url.netloc or PRIVATE_HOST.match(host)
                                    or host.isdigit() or host.lower().startswith("0x") or ":" in host):
             return "only public https URLs without credentials are allowed"
-    if tool == "Agent" and not orch:
-        return "only Gandalf may start other agents"
+    if tool == "Agent":
+        if not orch:
+            return "only Gandalf may start other agents"
+        agent_type = args.get("agent_type")
+        if not isinstance(agent_type, str) or not agent_type.strip() or agent_type.strip().lower() == ORCH:
+            return "choose an explicit agent_type; recursive Gandalf runs are not allowed"
     return None
 
 

@@ -35,9 +35,11 @@ PR number or URL, explicit words, then topic.
 
 Agents: edits to `sam`; comment cleanup on a diff to `gollum`. Multi-role work
 (plan, then run BE/FE/QA and others) to `gandalf`, who asks before
-acting and picks any role or built-in agent (adversary, analyst, architect, backend,
+acting and chooses any available agent, preferring custom specialists (adversary, analyst, architect, backend,
 ci-fixer, devops, docs, frontend, manager, ml-engineer, prompt-engineer, qa,
 resolver, retrieval, reviewer, security, visionary, vp).
+Workers can collaborate within their briefs. Gandalf owns spawning, assignments,
+scope and escalation, and supervises built-ins without claiming they have role hooks.
 
 Build skills end by offering `pr-forge`. Never merge a PR unless he says so
 for that PR. Commits, pushes, PRs and Jira writes are ask-first. Close tasks per `ground-rules`.

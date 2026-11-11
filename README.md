@@ -43,11 +43,12 @@ No rings, no prophecies, no framework. Just Markdown with a purpose.
 
 | Agent | Its quest |
 |---|---|
-| [gandalf](agents/gandalf/README.md) | The orchestrator: plans, asks, then starts whichever agents the task needs. |
+| [gandalf](agents/gandalf/README.md) | The orchestrator: plans, asks, chooses workers and supervises their collaboration. |
 | [gollum](agents/gollum/README.md) | Hates unnecessary comments with his whole heart. |
 | [sam](agents/sam/README.md) | A loyal delegate that carries the edits. |
 
-Gandalf's roles live in [roles/](roles/README.md) and are the team he can start:
+Gandalf prefers the specialists in [roles/](roles/README.md), but can also use
+any available custom or built-in agent. His roles include:
 [adversary](roles/adversary/README.md), [analyst](roles/analyst/README.md),
 [architect](roles/architect/README.md), [backend](roles/backend/README.md),
 [ci-fixer](roles/ci-fixer/README.md), [devops](roles/devops/README.md),
@@ -78,34 +79,26 @@ for s in skills/*/; do
   n=$(basename "$s")
   [ -e "$HOME/.copilot/skills/$n" ] || ln -s "$PWD/skills/$n" "$HOME/.copilot/skills/$n"
 done
-
-mkdir -p "$HOME/.copilot/agents"
-for a in agents/*/*.agent.md roles/*/*.agent.md; do
-  n=$(basename "$a")
-  [ -e "$HOME/.copilot/agents/$n" ] || ln -s "$PWD/$a" "$HOME/.copilot/agents/$n"
-done
 ```
 
-Gandalf, his roles, `sam` and `gollum` all need the [guard](guard/README.md). Read
-`guard/guard.py`, then link it:
+Install Gandalf, the custom roles, `sam`, `gollum`, their
+[guard](guard/README.md) and the always-on routing file as stable copies.
+Read `guard/guard.py`, then run:
 
 ```sh
-[ -e "$HOME/.copilot/guard" ] || ln -s "$PWD/guard" "$HOME/.copilot/guard"
+python3 scripts/install-agents.py
 ```
+
+The installer replaces this repo's old agent, guard and routing symlinks and
+updates their copies. It refuses foreign symlinks. Inspect existing managed
+files first: rerunning replaces those files, including the routing file, but
+leaves unrelated agents and configuration alone.
+
+Changing branches no longer changes installed agents or guards. Rerun the
+installer when you want to publish edits, then restart Copilot CLI. Skills stay
+linked; repeat their link step for future skills.
 
 For parallel work, [scripts](scripts/README.md) has a worktree helper.
-
-Then link the always-on routing file, so Copilot picks the right skill or agent
-from a plain request in every repo. It only links if none exists yet; if you
-already have a `~/.copilot/copilot-instructions.md`, merge by hand.
-
-```sh
-[ -e "$HOME/.copilot/copilot-instructions.md" ] || \
-  ln -s "$PWD/copilot-instructions.md" "$HOME/.copilot/copilot-instructions.md"
-```
-
-If that destination already exists, inspect it first; don't overwrite your
-existing fellowship. Repeat the link step for any future skills you want to use.
 
 In Copilot CLI, run `/skills reload`, then `/skills info create-jira-bug`.
 Personal skills are shared across your projects, not copied into each repo.
