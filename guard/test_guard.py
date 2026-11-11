@@ -36,6 +36,13 @@ def agent(agent_type=None):
     return {"tool_name": "Agent", "tool_input": {"prompt": "x", **({"agent_type": agent_type} if agent_type else {})}}
 
 
+def patch(path, text="x", move=None):
+    body = f"*** Begin Patch\n*** Update File: {path}\n"
+    if move:
+        body += f"*** Move to: {move}\n"
+    return {"tool_name": "apply_patch", "tool_input": body + f"@@\n-a\n+{text}\n*** End Patch\n"}
+
+
 # (role, event, expected) where expected is None (allowed), "deny" or "ask"
 CASES = [
     # merge: denied for roles, asks Themis for Gandalf
@@ -121,15 +128,38 @@ CASES = [
     ("analyst", web("https://u:p@example.com"), "deny"),
     ("analyst", web("https://2130706433/"), "deny"),
     ("analyst", web("https://[::ffff:127.0.0.1]/"), "deny"),
-    ("backend", web("https://example.com"), "deny"),
+    ("backend", web("https://example.com"), None),
+    ("gandalf", web("https://example.com"), None),
+    ("backend", web("http://example.com"), "deny"),
+    ("gandalf", web("https://192.168.1.1"), "deny"),
+    ("backend", {"tool_name": "WebSearch", "tool_input": {"query": "public research"}}, None),
     ("backend", agent(), "deny"),
     ("backend", agent("sam"), "deny"),
     ("gandalf", agent("backend"), None),
     ("gandalf", agent("sam"), None),
     ("gandalf", agent("gollum"), None),
+    ("gandalf", agent("vp"), None),
     ("gandalf", agent("general-purpose"), None),
     ("gandalf", agent("explore"), None),
-    ("gandalf", agent(), None),
+    ("gandalf", agent("future-available-agent"), None),
+    ("gandalf", agent("gandalf"), "deny"),
+    ("gandalf", agent(), "deny"),
+    ("gandalf", {"tool_name": "task", "tool_input": {"agent_type": "general-purpose", "name": "backend"}}, None),
+    ("gandalf", {"tool_name": "task", "tool_input": {"agent_type": ""}}, "deny"),
+    ("gandalf", {"tool_name": "task", "tool_input": {"agent_type": 5}}, "deny"),
+    ("backend", {"tool_name": "write_agent", "tool_input": {"agent_id": "peer", "message": "API result"}}, None),
+    ("frontend", {"tool_name": "read_agent", "tool_input": {"agent_id": "peer"}}, None),
+    # Freeform patches are text, not JSON objects; every file and move target is checked.
+    ("sam", patch("guard/test_guard.py"), None),
+    ("sam", {**patch("guard/test_guard.py"), "tool_name": "Edit"}, None),
+    ("backend", patch("src/app.py", move="src/new.py"), None),
+    ("backend", patch(".env"), "deny"),
+    ("backend", patch("src/app.py", move=".env"), "deny"),
+    ("backend", patch("~/.copilot/agents/backend.agent.md"), "deny"),
+    ("backend", patch("src/app.py", GH_TOKEN), "deny"),
+    ("backend", {**patch(".env"), "tool_name": "Write"}, "deny"),
+    ("backend", {"tool_name": "apply_patch", "tool_input": "not a patch"}, "deny"),
+    ("backend", {"tool_name": "apply_patch", "tool_input": ""}, "deny"),
     # tool-name spelling and malformed payloads
     ("backend", {"tool_name": "bash", "tool_input": {"command": "git merge x"}}, "deny"),
     ("backend", {"tool_name": "bash", "tool_input": {"command": 5}}, "deny"),
