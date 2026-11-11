@@ -32,7 +32,7 @@ or unknown role is printed as a deny.
 | `gh` limited to reads (`gh api` GET only); merge, delete and every other write denied | `test_guard.py` |
 | No curl, wget, ssh, sudo, cloud CLIs, deploys, publishing | `test_guard.py` |
 | Writes only inside the working directory or a linked worktree of the repo (never the primary checkout from a linked one); `qa` tests only, `docs` Markdown only | `test_guard.py`; live: write to `/tmp` blocked |
-| Gandalf writes nothing and runs only `scripts/new-worktree.sh <branch> [base]` | `test_guard.py` |
+| Gandalf edits and runs the shell under builder checks, plus `git add/commit/push/switch/fetch/stash/worktree add` and `gh pr/issue create/comment/edit`. He **asks Themis** (a real prompt) for merge, rebase, reset, checkout, pull, `gh pr merge/close`, curl/wget, deletes or writes outside the working directory, and any agent that is not one of the roles. Remote deletes, force-push and `.git` writes are denied | `test_guard.py` |
 | Secret files, `~/.copilot` config, secret env vars, token patterns | `test_guard.py`; live: `$GITHUB_TOKEN` read blocked |
 | Web fetch limited to public https | `test_guard.py` |
 | Hook fires when Gandalf starts a role as a subagent | Live: `backend` shell call denied via Gandalf |

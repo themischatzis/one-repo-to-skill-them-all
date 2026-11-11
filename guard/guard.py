@@ -47,7 +47,7 @@ SECRET = re.compile(r"""(?:^|[/\s='"])(?:
 SECRET_ENV_VAR = re.compile(r"\$\{?\w*(?:TOKEN|SECRET|PASSWORD|PASSWD|API_?KEY|PRIVATE_KEY|CREDENTIAL)", re.I)
 TOKENS = re.compile(
     r"gh[pousr]_[A-Za-z0-9]{36,}|github_pat_\w{40,}|AKIA[0-9A-Z]{16}|xox[abprs]-[\w-]{10,}"
-    r"|sk-[A-Za-z0-9_-]{20,}|AIza[\w-]{35}|-----BEGIN [A-Z ]*PRIVATE KEY-----"
+    r"|(?<![A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}|AIza[\w-]{35}|-----BEGIN [A-Z ]*PRIVATE KEY-----"
     r"|eyJ[\w-]{10,}\.[\w-]{10,}\.[\w-]{10,}")
 COPILOT_HOME = re.compile(r"\.copilot(?:/|\b)")
 
@@ -74,6 +74,15 @@ GIT_ALLOW = {
 GIT_BAD_FLAG = re.compile(r"--(?:ext-diff|no-index|open-files-in-pager|textconv)|-O")
 GIT_BRANCH_LIST = {"--show-current", "-a", "--all", "-r", "--remotes", "-v", "-vv", "--verbose", "-l", "--list"}
 GIT_BRANCH_VALUE = {"--contains", "--no-contains", "--merged", "--no-merged", "--points-at", "--sort", "--format"}
+ASK = "ask: "
+# Extra git verbs for Gandalf only. The first set runs freely, the second asks Themis each time.
+GIT_ORCH = {"add", "commit", "push", "switch", "fetch", "stash", "worktree"}
+GIT_ASK = {"merge", "rebase", "reset", "checkout", "restore", "clean", "pull", "cherry-pick", "revert", "tag", "am", "apply"}
+GH_ASK = {"pr": {"merge", "close", "reopen", "review"}, "issue": {"close", "reopen"}}
+ASK_COMMANDS = {"curl", "wget"}
+GIT_ORCH_BAD = re.compile(r"-f\Z|--force\S*|--delete|-d\Z|-D\Z|--mirror|--prune|--no-verify|:\S")
+# Extra GitHub verbs for Gandalf only. Nothing deletes remote state.
+GH_ORCH = {"pr": {"create", "edit", "comment", "ready"}, "issue": {"create", "comment", "edit"}}
 # Read-only GitHub access. Anything that changes or deletes remote state is absent on purpose.
 GH_ALLOW = {
     "pr": {"view", "list", "diff", "checks", "status"}, "issue": {"view", "list", "status"},
@@ -121,7 +130,7 @@ def worktrees(cwd):
     return [os.path.realpath(line[9:]) for line in out.splitlines() if line.startswith("worktree ")][1:]
 
 
-def path_problem(path, cwd, write, scope=None):
+def path_problem(path, cwd, write, scope=None, orch=False):
     """Why a file path is off limits, or None."""
     real = resolve(path, cwd)
     if SECRET.search(real):
@@ -131,7 +140,7 @@ def path_problem(path, cwd, write, scope=None):
     if write:
         root = cwd if inside(real, cwd) else next((w for w in worktrees(cwd) if inside(real, w)), None)
         if root is None:
-            return f"{path} is outside the working directory and its worktrees"
+            return (ASK if orch else "") + f"{path} is outside the working directory and its worktrees"
         if ".git" in os.path.relpath(real, root).split(os.sep):
             return "writing inside .git is not allowed"
         if scope and not any(glob_re(g).match(os.path.relpath(real, root)) for g in scope):
@@ -160,17 +169,22 @@ def parse(command):
     return segments + [words], [t for t in targets if t != "/dev/null" and not re.match(r"&?\d*-?$", t)]
 
 
-def first_sub(args):
-    """First non-option word, skipping the values of -C and -c."""
+def sub_index(args):
+    """Index of the first non-option word, skipping the values of -C and -c; len(args) if none."""
     skip = False
-    for a in args:
+    for i, a in enumerate(args):
         if skip:
             skip = False
         elif a in ("-C", "-c"):
             skip = True
         elif not a.startswith("-"):
-            return a
-    return None
+            return i
+    return len(args)
+
+
+def first_sub(args):
+    i = sub_index(args)
+    return args[i] if i < len(args) else None
 
 
 def branch_problem(args):
@@ -212,7 +226,7 @@ def api_problem(args):
     return None
 
 
-def check_words(words, cwd, may_write):
+def check_words(words, cwd, may_write, orch=False):
     while words and (words[0] in KEYWORDS or "=" in words[0].split("/")[0] or words[0] in WRAPPERS):
         wrapper = words[0]
         words = words[1:]
@@ -228,6 +242,8 @@ def check_words(words, cwd, may_write):
     if not words:
         return None
     cmd, args = os.path.basename(words[0]), words[1:]
+    if orch and cmd in ASK_COMMANDS:
+        return f"{ASK}{cmd} reaches the network"
     if cmd in ALWAYS_DENY:
         return f"{cmd} is not allowed"
     if cmd == "set" and not args or cmd == "export" and (not args or "-p" in args):
@@ -237,11 +253,17 @@ def check_words(words, cwd, may_write):
     if cmd == "find" and {"-delete", "-exec", "-execdir", "-ok", "-okdir"} & set(args):
         return "find with -delete or -exec is not allowed"
     if cmd == "git":
-        if "-c" in args or any(a.startswith(("--config-env", "--output", "--exec-path")) or GIT_BAD_FLAG.match(a) for a in args):
+        if "-c" in args[:sub_index(args)] or any(a.startswith(("--config-env", "--output", "--exec-path")) or GIT_BAD_FLAG.match(a) for a in args):
             return "git config overrides, --output and external programs are not allowed"
         sub = first_sub(args)
-        if sub not in GIT_ALLOW:
+        if orch and sub in GIT_ASK:
+            return f"{ASK}git {sub} changes history or the working tree"
+        if sub not in GIT_ALLOW | (GIT_ORCH if orch else set()):
             return f"git {sub} is not allowed, the parent handles git"
+        if orch and sub in GIT_ORCH and any(GIT_ORCH_BAD.match(a) for a in args[args.index(sub) + 1:]):
+            return f"git {sub} with force, delete or no-verify flags is not allowed"
+        if orch and sub == "worktree" and (args[args.index(sub) + 1:] or [""])[0] not in ("add", "list"):
+            return "git worktree may only add or list"
         if sub == "branch" and (problem := branch_problem(args[args.index("branch") + 1:])):
             return problem
     elif cmd == "gh":
@@ -249,22 +271,27 @@ def check_words(words, cwd, may_write):
         if sub == ["api"]:
             if problem := api_problem(args[1:]):
                 return problem
-        elif not (sub and rest and rest[0] in GH_ALLOW.get(sub[0], ())):
+        elif orch and sub and rest and rest[0] in GH_ASK.get(sub[0], ()):
+            return f"{ASK}gh {sub[0]} {rest[0]} changes remote state"
+        elif not (sub and rest and (rest[0] in GH_ALLOW.get(sub[0], ())
+                                    or orch and rest[0] in GH_ORCH.get(sub[0], ()))):
             return f"gh {' '.join(args[:2])} is not allowed"
     elif cmd in DENY_SUB and first_sub(args) in DENY_SUB[cmd]:
         return f"{cmd} {first_sub(args)} is not allowed"
     if cmd in WRITERS or cmd in ("sed", "perl") and any(a.startswith("-i") for a in args):
         if not may_write:
             return f"{cmd} writes files, which this role may not do from the shell"
-        if cmd == "rm" and any(a.startswith("-") and set(a[1:]) & set("rRf-") for a in args):
+        if cmd == "rm" and not orch and any(a.startswith("-") and set(a[1:]) & set("rRf-") for a in args):
             return "rm with -r or -f is not allowed"
         for a in args:
-            if not a.startswith("-") and (problem := path_problem(a, cwd, True)):
+            if cmd == "rm" and orch and not a.startswith("-") and resolve(a, cwd) == cwd:
+                return f"{ASK}rm of the whole working directory"
+            if not a.startswith("-") and (problem := path_problem(a, cwd, True, orch=orch)):
                 return problem
     return None
 
 
-def check_shell(command, cwd, may_write):
+def check_shell(command, cwd, may_write, orch=False):
     if "`" in command:
         return "backticks are not supported, use $() or separate commands"
     if "\n" in command or "\r" in command:
@@ -283,15 +310,11 @@ def check_shell(command, cwd, may_write):
     for target in targets:
         if not may_write:
             return "this role may not write files from the shell"
-        if problem := path_problem(target, cwd, True):
+        if problem := path_problem(target, cwd, True, orch=orch):
             return problem
-    for words in segments:
-        if problem := check_words(words, cwd, may_write):
-            return problem
-    return None
+    problems = [p for words in segments if (p := check_words(words, cwd, may_write, orch))]
+    return next((p for p in problems if not p.startswith(ASK)), problems[0] if problems else None)
 
-
-NEW_WORKTREE = re.compile(r"scripts/new-worktree\.sh [A-Za-z0-9][A-Za-z0-9._/-]*( [A-Za-z0-9][A-Za-z0-9._/~^-]*)?\Z")
 
 TOOL_ALIASES = {
     "bash": "Bash", "shell": "Bash", "powershell": "Bash",
@@ -315,21 +338,17 @@ def check(role, event):
     path = args.get("path") or args.get("file_path")
     if path is not None and not isinstance(path, str):
         return "the path is not a string"
-    if tool == "Bash" and cls == "orchestrate":
-        if not NEW_WORKTREE.match(str(args.get("command", ""))):
-            return "Gandalf may only run scripts/new-worktree.sh <new-branch> [base]"
-        return None
     if tool == "Bash":
-        if cls not in ("inspect", "build"):
+        if cls not in ("inspect", "build", "orchestrate"):
             return "this role has no shell"
         command = args.get("command", "")
         if not isinstance(command, str):
             return "the command is not a string"
-        return check_shell(command, cwd, cls == "build" and scope is None)
+        return check_shell(command, cwd, cls in ("build", "orchestrate") and scope is None, cls == "orchestrate")
     if tool == "Write":
-        if cls != "build":
+        if cls not in ("build", "orchestrate"):
             return "this role is read-only"
-        return path_problem(path, cwd, True, scope) if path else "an edit without a path cannot be checked"
+        return path_problem(path, cwd, True, scope, cls == "orchestrate") if path else "an edit without a path cannot be checked"
     if tool == "Read" and path:
         return path_problem(path, cwd, False)
     if tool in ("WebFetch", "WebSearch"):
@@ -344,7 +363,7 @@ def check(role, event):
         if cls != "orchestrate":
             return "only Gandalf may start other agents"
         if args.get("agent_type") not in STARTABLE:
-            return "Gandalf may only start the role agents, sam or gollum"
+            return f"{ASK}{args.get('agent_type')} is not one of Themis's own agents"
     return None
 
 
@@ -392,7 +411,7 @@ def decide(role, event, directory=None):
     reason = halted(role, session_id, directory) or check(role, event)
     if not reason and over_budget(role, session_id, directory):
         reason = f"more than {MAX_CALLS} tool calls in this session, which looks like a runaway loop"
-    if reason and not reason.startswith(("a STOP", f"{MAX_DENIALS} blocked")):
+    if reason and not reason.startswith(("a STOP", f"{MAX_DENIALS} blocked", ASK)):
         bump("strikes", role, session_id, directory)
     return reason
 
@@ -403,7 +422,12 @@ def main():
         reason = decide(role, json.load(sys.stdin))
     except Exception as e:
         reason = f"the guard failed ({type(e).__name__}), failing closed"
-    if reason:
+    if reason and reason.startswith(ASK):
+        print(json.dumps({
+            "permissionDecision": "ask",
+            "permissionDecisionReason": f"Gandalf needs Themis's approval: {reason[len(ASK):]}.",
+        }))
+    elif reason:
         print(json.dumps({
             "permissionDecision": "deny",
             "permissionDecisionReason": f"Blocked by guard ({role}): {reason}. Report BLOCKED to the parent with this reason; do not look for another route.",

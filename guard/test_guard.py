@@ -13,6 +13,7 @@ CWD = os.path.realpath(tempfile.mkdtemp())
 GH_TOKEN = "gh" + "p_" + "A" * 36
 AWS_KEY = "AK" + "IA" + "A" * 16
 PEM = "-----BEGIN " + "RSA PRIVATE KEY-----"
+OPENAI_KEY = "s" + "k-" + "A" * 24
 
 
 def bash(cmd):
@@ -38,6 +39,12 @@ CASES = [
     ("backend", bash("git -C . push"), True),
     ("backend", bash("git -c core.pager=sh log"), True),
     ("backend", bash("git branch -D old"), True),
+    ("gandalf", bash("git switch -c feat/x"), False),
+    ("gandalf", bash("git -c core.pager=x status"), True),
+    ("backend", bash("git -c a=b log"), True),
+    ("gandalf", bash("git switch -c feat/gandalf-approval-tiers-and-journal"), False),
+    ("gandalf", bash("git switch -c " + "ta" + "sk-" + "abcde-fghij-klmno-pqrst-uvwxy"), False),
+    ("backend", bash("echo " + OPENAI_KEY), True),
     ("backend", bash("git status; git merge other"), True),
     ("backend", bash("echo a | git reset --hard"), True),
     ("reviewer", bash("gh pr view 12"), False),
@@ -138,8 +145,6 @@ CASES = [
     ("gandalf", {"tool_name": "Agent", "tool_input": {"prompt": "x"}}, True),
     ("gandalf", {"tool_name": "Agent", "tool_input": {"prompt": "x", "agent_type": "gandalf"}}, True),
     ("backend", {"tool_name": "Agent", "tool_input": {"prompt": "x", "agent_type": "sam"}}, True),
-    ("gandalf", bash("ls"), True),
-    ("gandalf", write("a.md"), True),
     # sam and gollum are guarded like any role
     ("sam", bash("git push"), True),
     ("sam", write("src/a.php"), False),
@@ -195,10 +200,19 @@ CASES = [
     ("gandalf", {"tool_name": "task", "tool_input": {"agent_type": "general-purpose"}}, True),
     ("gandalf", bash("scripts/new-worktree.sh feat/x"), False),
     ("gandalf", bash("scripts/new-worktree.sh feat/x main"), False),
-    ("gandalf", bash("scripts/new-worktree.sh -x"), True),
-    ("gandalf", bash("scripts/new-worktree.sh feat/x; git push"), True),
-    ("gandalf", bash("ls"), True),
-    ("gandalf", write("a.txt"), True),
+    ("gandalf", bash("ls"), False),
+    ("gandalf", write("a.txt"), False),
+    ("gandalf", bash("git commit -m x"), False),
+    ("gandalf", bash("git push origin feat/x"), False),
+    ("gandalf", bash("git push --force origin feat/x"), True),
+    ("gandalf", bash("git push origin :feat/x"), True),
+    ("gandalf", bash("git push origin --delete feat/x"), True),
+    ("gandalf", bash("git worktree remove x"), True),
+    ("gandalf", bash("gh pr create --title x"), False),
+    ("gandalf", bash("rm -rf x"), False),
+    ("gandalf", bash("rm -rf .git"), True),
+    ("gandalf", bash("sudo ls"), True),
+    ("gandalf", write("../outside.txt"), True),
     ("analyst", {"tool_name": "WebFetch", "tool_input": {"url": "https://2130706433/"}}, True),
     ("analyst", {"tool_name": "WebFetch", "tool_input": {"url": "https://[::ffff:127.0.0.1]/"}}, True),
 ]
@@ -211,6 +225,19 @@ class GuardTest(unittest.TestCase):
             with self.subTest(role=role, event=event):
                 reason = guard.check(role, event)
                 self.assertEqual(reason is not None, denied, reason)
+
+    def test_gandalf_asks_instead_of_denying(self):
+        asks = [bash("git merge main"), bash("git rebase main"), bash("git reset --hard"),
+                bash("gh pr merge 1"), bash("curl https://x.y"), bash("rm /tmp/some-file"),
+                bash("rm -rf ."), write("/tmp/outside.txt"),
+                {"tool_name": "Agent", "tool_input": {"prompt": "x", "agent_type": "general-purpose"}}]
+        for event in asks:
+            with self.subTest(event=event):
+                reason = guard.check("gandalf", {**event, "cwd": CWD})
+                self.assertTrue(str(reason).startswith(guard.ASK), reason)
+        out = subprocess.run([sys.executable, GUARD, "gandalf"], capture_output=True, text=True,
+                             input=json.dumps({**bash("git merge main"), "cwd": CWD, "session_id": "ask-test"})).stdout
+        self.assertEqual(json.loads(out)["permissionDecision"], "ask")
 
     def test_every_role_has_a_class(self):
         self.assertEqual(len(guard.ROLES), 21)
