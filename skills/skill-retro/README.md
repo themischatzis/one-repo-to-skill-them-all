@@ -22,10 +22,13 @@ The [skill instructions](SKILL.md) have the detail.
 
 Notes live in a separate **private** repo so they follow you across laptops
 and stay out of this public one. The journal is split so a review stays cheap:
-`inbox.md` (unreviewed, the only file read by default), `ideas.md` (undecided),
-`rejected.md` (decided no, searched before proposing), `reviewed/YYYY-MM.md`
-(applied or kept) and `sessions/` (daily auto-log). After each review, inbox
-lines are filed into the right place.
+`inbox.md` (unreviewed, with a `## Proposed` block for agent suggestions you
+accept or delete), `ideas.md` (undecided), `rejected.md` (decided no, searched
+before proposing), `reviewed/YYYY-MM-DD.md` (one file per review: decided,
+covered, retro line) and `sessions/` (auto-log). A review reads the inbox,
+ideas and the session files newer than the last review date, and looks in
+`reviewed/` only for that date. After each review, inbox lines are filed into
+the right place.
 
 ```sh
 gh repo clone themischatzis/skill-journal "$HOME/Projects/skill-journal"
@@ -35,7 +38,10 @@ gh repo clone themischatzis/skill-journal "$HOME/Projects/skill-journal"
 
 `log-sessions.sh` adds a line per Copilot session (CLI or VS Code, read from the
 local session store, so closed tabs are fine) to the journal repo and pushes.
-Run it by hand any time. To run it daily at 16:00 local time (UK time on a UK
+It looks back 7 days and skips sessions already logged. The daily job writes
+`sessions/YYYY-MM-DD-scheduled.md`. Run `log-sessions.sh --adhoc` for your own
+pushes; that writes `sessions/YYYY-MM-DD-adhoc.md` (or `-adhoc-HHMM` if it
+exists). A run with nothing new writes no file. To run it daily at 16:00 local time (UK time on a UK
 laptop; a missed run fires on wake):
 
 ```sh

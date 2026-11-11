@@ -13,13 +13,20 @@ usernames into this repo.
 
 Layout, kept small on purpose:
 
-- `inbox.md`: unreviewed lines. New observations go here.
-- `ideas.md`: undecided. `rejected.md`: decided no, with a reason.
-- `reviewed/YYYY-MM.md`: applied or kept. `sessions/`: daily auto-log.
+- `inbox.md`: unreviewed lines he says by hand, plus lines proposed to him.
+  Keep a `## Proposed` block at the bottom for agent proposals he accepts or
+  deletes. Never add to the main list without his yes. A review ignores
+  unaccepted proposals.
+- `ideas.md`: lines he chose to park there. `rejected.md`: decided no, with a reason (one file).
+- `reviewed/YYYY-MM-DD.md`: one file per review date: decided, covered
+  (sessions and inbox lines), retro line.
+- `sessions/YYYY-MM-DD-scheduled.md`: daily job.
+  `sessions/YYYY-MM-DD-adhoc.md` (or `-adhoc-HHMM`): his own runs.
 
-Read only `inbox.md` by default. Read `ideas.md`, `reviewed/` or `sessions/`
-only when he asks. Before proposing something new, `grep` `rejected.md` so it
-is not offered twice.
+A review reads `inbox.md`, `ideas.md` and the `sessions/` files newer than the
+last review date (the newest `reviewed/` filename). It never reads `reviewed/`
+except to find that date. Before proposing something new, `grep` `rejected.md`
+so it is not offered twice.
 
 ## Log
 
@@ -34,8 +41,9 @@ cross-repo preference is stated, also offer to save it as a Copilot memory.
 
 ## Review
 
-1. Pull the journal; read `inbox.md` (plus `ideas.md` only if asked) and
-   `git log`/`git status` of the skills repo.
+1. Pull the journal; read `inbox.md`, `ideas.md` and the `sessions/` files
+   newer than the last review date, plus `git log`/`git status` of the skills
+   repo.
 2. Query past sessions (`session_store_sql`, last 7-14 days) for sessions that
    used these skills: which ran, which never did, where he corrected course,
    what he asked for that no skill covered.
@@ -45,10 +53,11 @@ cross-repo preference is stated, also offer to save it as a Copilot memory.
 4. Present a table (skill, evidence, verdict, proposed change), then make the
    agreed edits uncommitted for review. Don't commit, branch or open a PR
    unless asked.
-5. File every inbox line after he decides: applied or kept to
-   `reviewed/YYYY-MM.md`, undecided to `ideas.md`, no to `rejected.md` with a
-   reason. Leave anything not yet decided in the inbox. Then add one dated
-   retro line to the new month's `reviewed/` file.
+5. A line leaves `inbox.md` only when he says it is done (applied: move it to
+   today's `reviewed/YYYY-MM-DD.md`) or discarded (move it to `rejected.md`
+   with a reason). A line that is kept or undecided stays in the inbox. Move
+   a line to `ideas.md` only when he says so. In the same file list the sessions and inbox lines covered, and add one
+   retro line.
 
 ## Reflect (after one session)
 
