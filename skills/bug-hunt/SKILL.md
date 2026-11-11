@@ -1,6 +1,7 @@
 ---
 name: bug-hunt
-description: Fix a bug end to end: reproduce, root-cause, test-first fix, verify. Use for "fix this bug", "this is broken", "investigate this defect", or a Jira bug key.
+description: >-
+  Fix a bug end to end: reproduce, root-cause, test-first fix, verify. Use for "fix this bug", "this is broken", "investigate this defect", or a Jira bug key.
 ---
 
 # Bug hunt

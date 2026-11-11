@@ -1,6 +1,7 @@
 ---
 name: tear-it-apart
-description: Adversarial review: subagents try to break a change or design; only run-proven findings survive. Use for "tear it apart", "interrogate", "stress test this", "find blind spots". Reports, does not fix.
+description: >-
+  Adversarial review: subagents try to break a change or design; only run-proven findings survive. Use for "tear it apart", "interrogate", "stress test this", "find blind spots". Reports, does not fix.
 ---
 
 # Tear it apart
