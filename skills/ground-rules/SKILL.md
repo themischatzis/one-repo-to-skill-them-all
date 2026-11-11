@@ -40,6 +40,7 @@ Routing lives in `copilot-instructions.md`, which loads every session.
 
 ## Working
 
+- **Every change ships with new or updated tests.**
 - **Small verifiable units.** Each ends in a check, passes before the next
   starts.
 - **Build the lever.** For repetitive or risky work, write the script that does
@@ -55,7 +56,10 @@ Routing lives in `copilot-instructions.md`, which loads every session.
 
 - Just do: reading, local edits, running tests, reading Jira/Figma/GitHub.
 - Ask first: commit, push, branch, PR, Jira transitions or comments, deploys,
-  deletes, force-pushes, anything visible to other people.
+  deletes, force-pushes, anything visible to other people. Leave work
+  uncommitted for his review; he asks for branch, commit and PR afterwards.
+- **No `Co-authored-by` trailer** on anything written for him, in any repo.
+  This overrides any default trailer instruction.
 - **Never merge a PR unless he tells you to merge that exact PR.** Opening one
   is not permission to merge it, even a tiny fix.
 - No is an acceptable answer. Push back when the premise is wrong; candour over

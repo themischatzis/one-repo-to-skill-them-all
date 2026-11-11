@@ -1,6 +1,7 @@
 ---
 name: babysit-pr
-description: Drive an open PR to merge-ready, or check on it: conflicts first, then review threads, then CI. Use for "babysit this PR", "get it green", "is it merge-ready", "address the review comments", "check on PR 123".
+description: >-
+  Drive an open PR to merge-ready, or check on it: conflicts first, then review threads, then CI. Use for "babysit this PR", "get it green", "is it merge-ready", "address the review comments", "check on PR 123".
 ---
 
 # Babysit PR

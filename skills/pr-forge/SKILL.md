@@ -32,7 +32,7 @@ both apply; mention the conflict.
    `gollum` agent if the diff is comment-heavy), no unrelated changes.
 3. **Commits**: small, ordered, each landable and telling the story. Amend a
    fix into the commit it belongs to; new commit when separable. Bodies do not
-   restate the subject. Include the Co-authored-by trailer.
+   restate the subject. No Co-authored-by trailer.
 4. **Push**, with the SSH fallback above if needed.
 5. **PR**: ready, not draft, unless he asks. Prefer several small PRs over one
    large one; a stack only when changes truly depend on each other. Use the
