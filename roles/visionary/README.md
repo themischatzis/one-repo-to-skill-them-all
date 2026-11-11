@@ -1,8 +1,7 @@
 # Visionary
 
 Galadriel's mirror: it shows what might be, not what will be. Explores where a
-product or codebase could go next. Read-only, with web access scoped by the
-[guard](../../guard/README.md).
+product or codebase could go next. Read-only; web access is public https only.
 
 The [agent instructions](visionary.agent.md) have the detail.
 

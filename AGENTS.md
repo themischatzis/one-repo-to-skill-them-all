@@ -12,7 +12,8 @@
   belong in the README only.
 - Agents you start yourself go in `agents/`. Roles that Gandalf starts as his
   team go in `roles/<name>/<name>.agent.md` with a `README.md`. Every agent and
-  role needs a guard hook and a row in `guard/guard.py`.
+  role needs a guard hook and its name in `ROLES` in `guard/guard.py`. Do not
+  add a `tools:` line; agents get every tool, MCP included.
 - Role files keep one fixed layout: Specialization, Work style, Rules. The guard
   and report rules live inside Rules.
 - Every new, renamed or removed skill or agent needs a row change in the

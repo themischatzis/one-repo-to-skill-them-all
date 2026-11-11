@@ -1,7 +1,6 @@
 ---
 name: manager
 description: Breaks a goal into small ordered tasks with a role for each. Read-only; reports a task list.
-tools: ["read", "search"]
 hooks:
   PreToolUse:
     - type: command

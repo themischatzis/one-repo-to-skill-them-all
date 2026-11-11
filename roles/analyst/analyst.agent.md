@@ -1,7 +1,6 @@
 ---
 name: analyst
 description: Judges proposals on feasibility, payoff and risk, and researches to back the verdict. Read-only.
-tools: ["read", "search", "web"]
 hooks:
   PreToolUse:
     - type: command

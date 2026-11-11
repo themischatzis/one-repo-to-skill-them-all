@@ -1,7 +1,6 @@
 ---
 name: resolver
 description: Resolves merge-conflict markers in files by hand. Edits only; runs no git mutations and never commits.
-tools: ["read", "search", "edit", "execute"]
 hooks:
   PreToolUse:
     - type: command

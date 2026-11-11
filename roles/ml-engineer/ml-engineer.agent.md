@@ -1,7 +1,6 @@
 ---
 name: ml-engineer
 description: Machine-learning and data code. Edits and runs local checks inside its brief; never commits.
-tools: ["read", "search", "edit", "execute"]
 hooks:
   PreToolUse:
     - type: command

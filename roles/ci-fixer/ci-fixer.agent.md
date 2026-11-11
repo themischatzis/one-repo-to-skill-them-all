@@ -1,7 +1,6 @@
 ---
 name: ci-fixer
 description: Diagnoses and fixes a failing CI job from its logs. Edits inside its brief; never commits or reruns remotely.
-tools: ["read", "search", "edit", "execute"]
 hooks:
   PreToolUse:
     - type: command

@@ -43,12 +43,11 @@ No rings, no prophecies, no framework. Just Markdown with a purpose.
 
 | Agent | Its quest |
 |---|---|
-| [gandalf](agents/gandalf/README.md) | The orchestrator: plans, asks, then runs the roles under guard. |
+| [gandalf](agents/gandalf/README.md) | The orchestrator: plans, asks, then starts whichever agents the task needs. |
 | [gollum](agents/gollum/README.md) | Hates unnecessary comments with his whole heart. |
 | [sam](agents/sam/README.md) | A loyal delegate that carries the edits. |
 
-Gandalf's roles live in [roles/](roles/README.md) and are the team he starts (each guarded
-by the [guard](guard/README.md)):
+Gandalf's roles live in [roles/](roles/README.md) and are the team he can start:
 [adversary](roles/adversary/README.md), [analyst](roles/analyst/README.md),
 [architect](roles/architect/README.md), [backend](roles/backend/README.md),
 [ci-fixer](roles/ci-fixer/README.md), [devops](roles/devops/README.md),

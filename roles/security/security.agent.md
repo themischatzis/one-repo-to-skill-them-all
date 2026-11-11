@@ -1,7 +1,6 @@
 ---
 name: security
 description: Looks for exploitable vulnerabilities and secret leaks. Runs read-only checks; never edits.
-tools: ["read", "search", "execute"]
 hooks:
   PreToolUse:
     - type: command

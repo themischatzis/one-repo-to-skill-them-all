@@ -1,7 +1,6 @@
 ---
 name: retrieval
 description: Finds and cites the code, docs and history relevant to a question. Read-only.
-tools: ["read", "search"]
 hooks:
   PreToolUse:
     - type: command
