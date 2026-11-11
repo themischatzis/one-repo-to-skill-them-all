@@ -1,7 +1,7 @@
 # Guard
 
 The hook that makes the fellowship's rules real. Every role agent and Gandalf
-run `guard.py <role>` before each tool call. It only ever denies; it never
+run `guard.py <role>` before each tool call. It can deny or ask; it never
 approves, so Copilot's normal permission prompts stay in charge.
 
 ## Install
@@ -27,41 +27,33 @@ or unknown role is printed as a deny.
 
 | Rule | Proof |
 |---|---|
-| Read-only roles cannot edit or run shell | `test_guard.py` |
-| Git limited to read-only subcommands; no commit, push, merge | `test_guard.py`; live: `backend` commit denied, commit count unchanged |
-| `gh` limited to reads (`gh api` GET only); merge, delete and every other write denied | `test_guard.py` |
-| No curl, wget, ssh, sudo, cloud CLIs, deploys, publishing | `test_guard.py` |
-| Writes only inside the working directory or a linked worktree of the repo (never the primary checkout from a linked one); `qa` tests only, `docs` Markdown only | `test_guard.py`; live: write to `/tmp` blocked |
-| Gandalf edits and runs the shell under builder checks, plus `git add/commit/push/switch/fetch/stash/worktree add` and `gh pr/issue create/comment/edit`. He **asks Themis** (a real prompt) for merge, rebase, reset, checkout, pull, `gh pr merge/close`, curl/wget, deletes or writes outside the working directory, and any agent that is not one of the roles. Remote deletes, force-push and `.git` writes are denied | `test_guard.py` |
-| Secret files, `~/.copilot` config, secret env vars, token patterns | `test_guard.py`; live: `$GITHUB_TOKEN` read blocked |
-| Web fetch limited to public https | `test_guard.py` |
-| Hook fires when Gandalf starts a role as a subagent | Live: `backend` shell call denied via Gandalf |
-| Gandalf can only start the 18 roles, `sam` or `gollum` | `test_guard.py`; the `agent_type` field was captured from a real payload |
-| One command per shell call; no line breaks or process substitution | `test_guard.py` |
-| No writes inside `.git`; calls without a `session_id` denied | `test_guard.py` |
+| **Merge**: `git merge`, `gh pr merge` and merge calls through `gh api` are denied for roles. Gandalf **asks Themis** (a real prompt) | `test_guard.py`; live: `backend` `gh pr merge` denied |
+| `sudo` is denied. Other sensitive commands (curl, wget, ssh, cloud CLIs, deploys, publishing, `xargs`, `eval`) **ask Themis** for every agent | `test_guard.py` |
+| Secret files, `~/.copilot` config, secret env vars, env dumps, token patterns | `test_guard.py`; live: `$GITHUB_TOKEN` read blocked |
+| Web fetch only for `analyst` and `visionary`, public https only | `test_guard.py` |
+| Only Gandalf starts agents. He may pick any, built-in or custom | `test_guard.py` |
+| One command per shell call; no backticks, heredocs, line breaks or process substitution | `test_guard.py` |
+| Calls without a `session_id` denied | `test_guard.py` |
 
 Run the proof: `python3 guard/test_guard.py`.
 
 ## What is not enforced
 
+- Roles can edit anywhere, run any git or `gh` command except merge, and use the
+  shell. Read-only roles are read-only by prompt only.
 - The shell check is a tripwire, not a sandbox. Running a file a role wrote
   (tests, npm scripts) can still do anything, and string obfuscation can slip
   past it.
 - Role prompts, `ground-rules` and the ask-first rules are advisory.
-- `sam` and `gollum` run under the guard too (`sam` as a builder, `gollum` as
-  read plus shell).
 - A hook that times out fails open, so the guard stays fast.
 - Each role is denied after 200 tool calls in one session, to stop runaway
   loops. Whether subagents share the parent's session is unverified, so several
   instances of one role may share one count. Counter files live under the system
   temp directory and are pruned after a day.
-- Tool names are matched case-insensitively. A tool the guard does not know is
-  allowed, and Copilot's normal permission flow decides.
-- Approved paths in a Gandalf brief are advisory. The guard keeps builders in
-  the working directory, not inside the files named in a brief.
+- Tool names are matched case-insensitively. A tool the guard does not know,
+  including every MCP tool, is allowed, and Copilot's normal permission flow decides.
 - Roles reading `~/.copilot/skills` through the shell are denied. Use the `read` tool.
-- In non-interactive `-p` runs, reads outside the working directory are denied
-  for lack of a prompt.
+- In non-interactive `-p` runs, an `ask` has no one to answer it.
 - Whether your organisation has its own policy is unknown.
 - Copilot's command sandboxing is not used yet and could be a stronger layer.
 
