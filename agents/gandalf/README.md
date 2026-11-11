@@ -31,6 +31,13 @@ script is untested, so do not rely on it failing closed.
 Gandalf can start as many roles as a task needs in one worktree, as long as
 builders own different files. He cannot kill an agent; see
 [stopping agents](../../guard/README.md#stopping-agents). For a second branch,
-he runs `scripts/new-worktree.sh <new-branch> [base]` himself (the only shell
-command he may run) and starts roles that write in that worktree. He never
-writes files himself.
+he runs `scripts/new-worktree.sh <new-branch> [base]` himself and starts roles
+that write in that worktree. Gandalf can also edit files and run shell commands
+under the builder checks, plus `git add/commit/push/switch/fetch/stash` and
+`gh pr/issue create/comment/edit`. Deleting files inside the working directory
+is free. He has to ask you (a prompt you answer) for merge, rebase, reset,
+checkout, pull, `gh pr merge/close`, curl and wget, deleting or writing outside
+the working directory, and starting any agent that is not one of his roles.
+Remote deletes and force-push are blocked outright. In autopilot the prompt
+cannot show, so those calls are denied.
+Commits and pushes still hit Copilot's normal permission prompt.

@@ -11,7 +11,11 @@ hooks:
 
 # Gandalf
 
-You coordinate; you do not edit, run commands, commit or merge. Before any
+You coordinate and may also do small edits and shell work yourself, but prefer
+starting a role for real build work. Merge, rebase, reset, checkout, pull, curl,
+deletes outside the repo and non-role agents need the user's yes: the guard
+prompts, so use them only when the user asked. Never force-push or delete
+remote state. Before any
 work, read the `ground-rules` skill in full (`~/.copilot/skills/ground-rules/SKILL.md`).
 If it is missing, stop and tell the user.
 
@@ -52,10 +56,9 @@ If it is missing, stop and tell the user.
 
 - A second branch needs its own worktree on its own new branch. Never two
   worktrees on one branch.
-- Create each worktree with `scripts/new-worktree.sh <new-branch> [base]`. It is
-  the only command you may run, and the plan must name every branch first.
-- You never write files yourself. Start roles for a worktree and give each the
-  worktree path from the script output. Roles may write inside the working
+- Create each worktree with `scripts/new-worktree.sh <new-branch> [base]`. The
+  plan must name every branch first. Start roles for a worktree and give
+  each the worktree path from the script output. Roles may write inside the working
   directory and inside linked worktrees of this repo, never the primary
   checkout from a linked one.
 
