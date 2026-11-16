@@ -12,6 +12,7 @@ import json
 import os
 import re
 import shlex
+import subprocess
 import sys
 import tempfile
 import time
@@ -26,7 +27,7 @@ ORCH = "gandalf"
 
 SECRET = re.compile(r"""(?:^|[/\s='"])(?:
     \.env(?:\.(?!(?:example|sample|template)\b)[\w.-]+)?(?![\w.-])
-  | [\w.-]+\.(?:pem|key|p12|pfx|jks|keystore)\b
+  | [\w.-]+\.(?:pem|key|p12|pfx|jks|keystore)(?![\w.-])
   | id_(?:rsa|dsa|ecdsa|ed25519)\b(?!\.pub)
   | \.(?:ssh|aws|gnupg|kube|docker)(?:/|\b)
   | \.(?:npmrc|netrc|pypirc|git-credentials)\b
@@ -38,23 +39,47 @@ TOKENS = re.compile(
     r"|(?<![A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}|AIza[\w-]{35}|-----BEGIN [A-Z ]*PRIVATE KEY-----"
     r"|eyJ[\w-]{10,}\.[\w-]{10,}\.[\w-]{10,}")
 COPILOT_HOME = re.compile(r"\.copilot(?:/|\b)")
+# Anything under ~/.copilot can be read except files holding tokens or settings; every write is off limits.
+SENSITIVE_COPILOT = re.compile(r"(?i)\b(?:config|mcp-config|settings)\.json\b|[\w.-]*(?:oauth|token|credential|secret)[\w.-]*")
+READ_CMDS = {"ls", "cat", "head", "tail", "wc", "grep", "rg", "find", "stat", "file", "diff", "jq", "du", "cd", "pwd", "echo", "cut"}
+FIND_WRITES = {"-delete", "-exec", "-execdir", "-ok", "-okdir", "-fprint", "-fls", "-fprintf", "--pre", "--pre-glob"}
+HIDDEN_GLOB = re.compile(r"(?:~|\$\{?HOME\}?|(?<![\w.])/[^\s]*?)/\.[^\s/]*[*?\[{]")
+DYNAMIC_SUB = re.compile(r"\b(?:git|gh)\s+(?:\$\(|`)")
+SHELLS = {"bash", "sh", "zsh", "dash"}
 MERGE_API = re.compile(r"mergePullRequest|enablePullRequestAutoMerge|/pulls/[^\s/]+/merge\b")
+SECRET_CMD = re.compile(r"\bgh\s+auth\s+(?:token|status\s+(?:-t|--show-token))\b|\bsecurity\s+find-(?:generic|internet)-password\b|\.config/gh/hosts\.yml")
+FORCE_PUSH = re.compile(r"^(?:--force|--prune|--delete|--mirror|-[a-zA-Z]*[fd][a-zA-Z]*|[+:].+)$")
+LEASE_PUSH = re.compile(r"^--force-with-lease(?:=.*)?$")
+SET_LIMIT = re.compile(r"^\s*python3?\s+(?:~|\$HOME|/\S+?)/\.copilot/guard/guard\.py\s+--set-limit\s+\d{3,6}\s*$")
+STATE_TAMPER = re.compile(r"gandal\S*-g|-guard\b|guard\.py\s+--set-limit|/(?:STOP|LIMIT)\b")
+
+
+def after_rebase(cwd):
+    """True when the last thing that moved HEAD in this repo was a finished rebase."""
+    try:
+        out = subprocess.run(["git", "reflog", "-1", "--format=%gs"], cwd=cwd, capture_output=True, text=True, timeout=3).stdout
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return "rebase" in out and "(finish)" in out
+DELETE_API = re.compile(r"\bgh\s+api\b.*(?:-X|--method)\s*=?\s*DELETE\b|\bgh\s+repo\s+delete\b", re.I)
+ASK_RAW = re.compile(
+    r"\b(?:curl|wget)\b[^|;&]*\|\s*(?:sudo\s+)?(?:ba|z|da)?sh\b"
+    r"|\bcurl\b[^|;&]*\s(?:-d|-F|-T|--data\S*|--form\S*|--upload-file)\b")
 
 ASK = "ask: "
-# sudo is the only command denied outright. These ask Themis first.
+# sudo, force-push and remote deletes are denied outright. These ask Themis first.
 SHADY = {
-    "su", "doas", "curl", "wget", "nc", "ncat", "netcat", "ssh", "scp", "sftp", "rsync", "telnet", "ftp",
-    "eval", "xargs", "chmod", "chown", "chgrp", "dd", "mkfs", "mount", "osascript", "launchctl", "crontab",
-    "defaults", "aws", "gcloud", "az", "twine", "wp",
+    "su", "doas", "nc", "ncat", "netcat", "ssh", "scp", "sftp", "rsync", "telnet", "ftp",
+    "dd", "mkfs", "osascript", "launchctl", "crontab", "aws", "gcloud", "az", "twine",
 }
 # Commands whose listed subcommands deploy, publish or log in. They ask Themis first.
 SHADY_SUB = {
-    "npm": {"publish", "login", "adduser", "logout", "token", "owner", "access", "deprecate", "unpublish", "dist-tag", "team", "org", "profile"},
-    "yarn": {"publish", "login", "npm"}, "pnpm": {"publish", "login"},
+    "npm": {"publish", "login", "adduser", "token", "owner", "access", "deprecate", "unpublish", "dist-tag"},
+    "yarn": {"publish", "login"}, "pnpm": {"publish", "login"},
     "cargo": {"publish", "login"}, "gem": {"push"}, "mvn": {"deploy"}, "gradle": {"publish"},
-    "docker": {"login", "push", "run", "exec", "compose", "system", "rm", "rmi"},
-    "terraform": {"apply", "destroy", "import", "taint"},
-    "kubectl": {"apply", "delete", "exec", "patch", "create", "replace", "scale", "rollout", "cp", "edit", "drain", "cordon"},
+    "docker": {"login", "push"},
+    "terraform": {"apply", "destroy"},
+    "kubectl": {"apply", "delete", "patch", "replace", "scale", "drain"},
     "helm": {"install", "upgrade", "uninstall", "rollback"},
 }
 ENV_DUMP = {"printenv", "declare", "typeset"}
@@ -71,10 +96,12 @@ def path_problem(path, cwd, write):
     """Why a file path is off limits, or None."""
     real = resolve(path, cwd)
     lexical = os.path.normpath(os.path.join(cwd, os.path.expanduser(path)))
+    if write and ("gandalf-guard" in real or "gandalf-guard" in lexical):
+        return "the guard's state is only for Themis to change"
     if SECRET.search(real) or SECRET.search(lexical):
         return f"{path} looks like a secret file"
     for p in (real, lexical):
-        if COPILOT_HOME.search(p) and (write or "/.copilot/skills/" not in p):
+        if COPILOT_HOME.search(p) and (write or SENSITIVE_COPILOT.search(p)):
             return "Copilot's own config is off limits"
     return None
 
@@ -120,14 +147,14 @@ def first_sub(args):
 
 def merges(cmd, args):
     if cmd == "git":
-        return first_sub(args) == "merge"
+        return first_sub(args) == "merge" and "--abort" not in args
     if cmd == "gh":
         words = [a for a in args if not a.startswith("-")]
         return any(words[i:i + 2] == ["pr", "merge"] for i in range(len(words)))
     return False
 
 
-def check_words(words, orch):
+def check_words(words, orch, cwd="."):
     while words and (words[0] in KEYWORDS or "=" in words[0].split("/")[0] or words[0] in WRAPPERS):
         wrapper = words[0]
         words = words[1:]
@@ -147,35 +174,69 @@ def check_words(words, orch):
         return "sudo is not allowed"
     if cmd in ENV_DUMP or cmd == "set" and not args or cmd == "export" and (not args or "-p" in args):
         return "dumping the environment is not allowed"
+    # Wrappers that run another command are checked as that command.
+    if cmd == "eval":
+        return check_shell(" ".join(args), cwd, orch)
+    if cmd == "xargs":
+        return check_words([a for a in args if not a.startswith("-")], orch, cwd)
+    if cmd in SHELLS and "-c" in args[:-1]:
+        return check_shell(args[args.index("-c") + 1], cwd, orch)
+    if cmd in ("git", "gh") and ((first_sub(args) or "").startswith(("$", "`")) or any(a.startswith("alias.") for a in args)):
+        return f"a dynamic or aliased {cmd} subcommand is not allowed"
     if merges(cmd, args):
         return f"{ASK if orch else ''}{cmd} merge is only for Themis to approve"
+    if cmd == "git" and first_sub(args) == "push":
+        push_args = args[sub_index(args) + 1:]
+        if any(FORCE_PUSH.match(a) for a in push_args):
+            return "force-push and remote deletes are not allowed"
+        if any(LEASE_PUSH.match(a) for a in push_args) and not after_rebase(cwd):
+            return "force-push is only allowed with --force-with-lease right after a rebase"
     if cmd in SHADY or first_sub(args) in SHADY_SUB.get(cmd, ()):
         return f"{ASK}{cmd} {first_sub(args) or ''}".rstrip() + " is sensitive"
     return None
 
 
+def copilot_reads_only(bare, segments):
+    """True when every .copilot mention is a readable subpath and every command only reads."""
+    if re.search(r"(?:^|[/\s])\.\.(?:/|\s|$)", bare):
+        return False
+    if SENSITIVE_COPILOT.search(bare):
+        return False
+    for words in segments:
+        words = [w for w in words if "=" not in w.split("/")[0]]
+        if words and (os.path.basename(words[0]) not in READ_CMDS or FIND_WRITES & set(words[1:])):
+            return False
+    return True
+
+
 def check_shell(command, cwd, orch):
-    if "`" in command:
-        return "backticks are not supported, use $() or separate commands"
-    if "\n" in command or "\r" in command:
-        return "one command per call, no line breaks"
-    if "<(" in command or ">(" in command:
-        return "process substitution is not supported"
     bare = command.replace("'", "").replace('"', "").replace("\\", "")
-    if SECRET.search(command) or SECRET.search(bare) or COPILOT_HOME.search(bare) or "/proc/" in command and "environ" in command:
-        return "the command touches a secret file or Copilot's config"
+    if SECRET.search(command) or SECRET.search(bare) or SECRET_CMD.search(command) or "/proc/" in command and "environ" in command:
+        return "the command touches a secret file"
     if SECRET_ENV_VAR.search(command):
         return "the command reads a secret-looking environment variable"
-    if MERGE_API.search(command):
-        return f"{ASK if orch else ''}merging through the API is only for Themis to approve"
+    # The one way to raise the call limit: Gandalf runs it and Themis approves the prompt.
+    if SET_LIMIT.match(command):
+        return f"{ASK if orch else ''}raising the call limit is only for Themis to approve"
+    if STATE_TAMPER.search(command):
+        return f"{ASK if orch else ''}the guard's state is only for Themis to change"
+    if HIDDEN_GLOB.search(bare) or DYNAMIC_SUB.search(command):
+        return "globs on hidden names and dynamic git or gh subcommands are not allowed"
+    if MERGE_API.search(command) or DELETE_API.search(command):
+        return f"{ASK if orch else ''}merging or deleting through the API is only for Themis to approve"
+    if ASK_RAW.search(command):
+        return f"{ASK}curl upload or pipe to shell is sensitive"
+    # Line breaks and substitutions split into segments, so each part is still checked.
     try:
-        segments, targets = parse(command)
-    except ValueError as e:
-        return str(e)
+        segments, targets = parse(re.sub(r"[\r\n`]|\$\(|[<>]\(", ";", command))
+    except ValueError:
+        segments, targets = [w.split() for w in re.split(r"[;&|()\r\n`]+", command)], []
+    if COPILOT_HOME.search(bare) and not copilot_reads_only(bare, segments):
+        return "the command touches Copilot's config"
     for target in targets:
         if problem := path_problem(target, cwd, True):
             return problem
-    problems = [p for words in segments if (p := check_words(words, orch))]
+    problems = [p for words in segments if (p := check_words(words, orch, cwd))]
     return next((p for p in problems if not p.startswith(ASK)), problems[0] if problems else None)
 
 
@@ -218,8 +279,11 @@ def check(role, event):
     if tool in ("Write", "Read") and path:
         return path_problem(path, cwd, tool == "Write")
     if tool in ("WebFetch", "WebSearch"):
-        url = urlparse(str(args.get("url", "")))
-        host = url.hostname or ""
+        try:
+            url = urlparse(str(args.get("url", "")))
+            host = url.hostname or ""
+        except ValueError:
+            return "the URL is not valid"
         if tool == "WebFetch" and (url.scheme != "https" or "@" in url.netloc or PRIVATE_HOST.match(host)
                                    or host.isdigit() or host.lower().startswith("0x") or ":" in host):
             return "only public https URLs without credentials are allowed"
@@ -232,7 +296,7 @@ def check(role, event):
     return None
 
 
-MAX_CALLS = 200
+MAX_CALLS = 500
 MAX_DENIALS = 10
 STATE_DIR = os.path.join(tempfile.gettempdir(), "gandalf-guard")
 
@@ -244,17 +308,37 @@ def bump(kind, role, session_id, directory=None):
     now = time.time()
     for name in os.listdir(directory):
         p = os.path.join(directory, name)
-        if name != "STOP" and now - os.path.getmtime(p) > 86400:
-            os.remove(p)
+        try:
+            if name != "STOP" and now - os.path.getmtime(p) > 86400:
+                os.remove(p)
+        except FileNotFoundError:
+            continue
     path = os.path.join(directory, hashlib.sha256(f"{kind}\0{session_id}\0{role}".encode()).hexdigest()[:32])
     with open(path, "ab") as f:
         f.write(b".")
     return os.path.getsize(path)
 
 
+def call_limit(directory=None):
+    """MAX_CALLS, or the higher limit Themis approved with --set-limit (it expires with the day-old prune)."""
+    try:
+        with open(os.path.join(directory or STATE_DIR, "LIMIT")) as f:
+            return max(MAX_CALLS, min(int(f.read().strip()), 100000))
+    except (OSError, ValueError):
+        return MAX_CALLS
+
+
+def set_limit(n, directory=None):
+    directory = directory or STATE_DIR
+    os.makedirs(directory, mode=0o700, exist_ok=True)
+    fd = os.open(os.path.join(directory, "LIMIT"), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w") as f:
+        f.write(str(n))
+
+
 def over_budget(role, session_id, directory=None):
-    """Count this call; True once a role passes MAX_CALLS in one session."""
-    return bump("calls", role, session_id, directory) > MAX_CALLS
+    """Count this call; True once a role passes the call limit in one session."""
+    return bump("calls", role, session_id, directory) > call_limit(directory)
 
 
 def halted(role, session_id, directory=None):
@@ -268,25 +352,83 @@ def halted(role, session_id, directory=None):
     return None
 
 
+def state(fn, default, *args):
+    """Run a counter or kill-switch step; a state-dir error must not block the agent."""
+    try:
+        return fn(*args)
+    except OSError:
+        return default
+
+
 def decide(role, event, directory=None):
     """The deny reason for one call, or None."""
     session_id = event.get("session_id")
     if not isinstance(session_id, str) or not session_id:
         return "the payload has no session_id, so calls cannot be counted"
-    reason = halted(role, session_id, directory) or check(role, event)
-    if not reason and over_budget(role, session_id, directory):
-        reason = f"more than {MAX_CALLS} tool calls in this session, which looks like a runaway loop"
+    reason = state(halted, None, role, session_id, directory) or check(role, event)
+    if not reason and state(over_budget, False, role, session_id, directory):
+        reason = f"more than {call_limit(directory)} tool calls in this session, which looks like a runaway loop; ask Themis to raise the limit"
     if reason and not reason.startswith(("a STOP", f"{MAX_DENIALS} blocked", ASK)):
-        bump("strikes", role, session_id, directory)
+        state(bump, 0, "strikes", role, session_id, directory)
     return reason
+
+
+def crash_reason(role, raw, error):
+    """After a guard bug: reads that cannot touch secrets go through, everything else is denied."""
+    try:
+        tool = TOOL_ALIASES.get(str(json.loads(raw).get("tool_name", "")).lower(), "")
+    except Exception:
+        tool = ""
+    unsafe = SECRET.search(raw) or TOKENS.search(raw) or (COPILOT_HOME.search(raw) and SENSITIVE_COPILOT.search(raw))
+    if tool == "Read" and role in ROLES and not unsafe:
+        return None
+    return f"the guard failed ({type(error).__name__}), failing closed"
+
+
+RULE_CODES = (
+    ("guard failed", "crash"), ("STOP", "stop"), ("blocked attempts", "halt"), ("tool calls", "budget"),
+    ("sudo", "sudo"), ("force-push", "force-push"), ("merg", "merge"), ("secret", "secret"),
+    ("Copilot", "config"), ("environment", "env"), ("sensitive", "ask-cmd"), ("agent", "spawn"),
+    ("https", "web"), ("patch", "patch"),
+)
+LOG_LIMIT = 1_000_000
+
+
+def log_decision(role, raw, reason, crashed):
+    """Append one redacted line (no command, path or token) per deny, ask or crash. Never raises."""
+    try:
+        path = os.environ.get("GUARD_LOG") or os.path.expanduser("~/.copilot/guard-logs/denials.log")
+        os.makedirs(os.path.dirname(path), mode=0o700, exist_ok=True)
+        if os.path.exists(path) and os.path.getsize(path) > LOG_LIMIT:
+            os.replace(path, path + ".1")
+        try:
+            event = json.loads(raw)
+            tool, session = str(event.get("tool_name", "")), str(event.get("session_id", ""))[:8]
+        except Exception:
+            tool, session = "", ""
+        code = "crash-allowed" if crashed and not reason else next((c for s, c in RULE_CODES if s in (reason or "")), "other")
+        kind = "ask" if reason and reason.startswith(ASK) else "deny" if reason else "allow"
+        line = json.dumps({"ts": int(time.time()), "role": role, "tool": tool, "kind": kind, "code": code, "session": session})
+        fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o600)
+        with os.fdopen(fd, "a") as f:
+            f.write(line + "\n")
+    except Exception:
+        pass
 
 
 def main():
     role = sys.argv[1] if len(sys.argv) > 1 else ""
+    if role == "--set-limit" and len(sys.argv) == 3 and sys.argv[2].isdigit():
+        set_limit(sys.argv[2])
+        print(f"call limit is now {call_limit()} until the state files are a day old")
+        return
+    raw, crashed = sys.stdin.read(), False
     try:
-        reason = decide(role, json.load(sys.stdin))
+        reason = decide(role, json.loads(raw))
     except Exception as e:
-        reason = f"the guard failed ({type(e).__name__}), failing closed"
+        reason, crashed = crash_reason(role, raw, e), True
+    if reason or crashed:
+        log_decision(role, raw, reason, crashed)
     if reason and reason.startswith(ASK):
         print(json.dumps({
             "permissionDecision": "ask",
