@@ -1,8 +1,40 @@
-<!-- # Guard
+# Guard
 
 The hook that makes the fellowship's rules real. Every role agent and Gandalf
 run `guard.py <role>` before each tool call. It can deny or ask; it never
 approves, so Copilot's normal permission prompts stay in charge.
+
+## What is blocked, and when
+
+The guard targets damage and theft, not everyday work. Each call gets one of
+three outcomes.
+
+| Outcome | When | Examples |
+|---|---|---|
+| **Allowed** | Anything not listed below | Edits, tests, `git`, `gh`, reading skills and agents under `~/.copilot` |
+| **Ask Themis** | A step that publishes, deploys, logs in or fetches code to run. Prompts for every agent, Gandalf included | `npm publish`, `docker push`, `terraform apply`, `kubectl delete`, `ssh`, cloud CLIs, `curl ... \| sh`, `curl` uploads |
+| **Denied** | The action is never needed | See below |
+
+Denied for hooked roles:
+
+- **Merging**: `git merge`, `gh pr merge`, merge calls through `gh api`. Gandalf
+  gets an ask instead.
+- **Destroying remote state**: plain force-push, `--delete`, `+ref`, `:ref`,
+  `gh api -X DELETE`, `gh repo delete`. `--force-with-lease` passes only right
+  after a finished rebase.
+- **Privilege and secrets**: `sudo`, environment dumps, `gh auth token`, secret
+  env vars, `.env`, keys, `~/.ssh`, token patterns.
+- **Copilot's own files**: any write under `~/.copilot`, and reads of
+  `config.json`, `mcp-config.json`, `settings.json` and files named oauth,
+  token, credential or secret. Other reads there are fine.
+- **Tampering**: the guard's state files, `--set-limit` (asks for Gandalf).
+- **Spawning**: workers started by anyone but Gandalf, or without an explicit
+  `agent_type`.
+- **Non-public web**: private hosts, plain http, URLs with credentials.
+- **Runaway work**: 500 calls in one session, or 10 denials, halts the role.
+  `/tasks` or the `STOP` file stops it sooner (see Stopping agents).
+- **Wrappers**: `eval`, `xargs`, `bash -c` and `$(...)` are checked as the
+  command they run, so they do not hide a denied one.
 
 ## Install
 
@@ -86,4 +118,4 @@ Run the proof: `python3 guard/test_guard.py` and
 
 ## Later
 
-Review cost and premium-request use of multi-agent runs. -->
+Review cost and premium-request use of multi-agent runs.
