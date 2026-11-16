@@ -2,7 +2,7 @@
 
 Saruman's quieter cousin, used for good. The last pass on a design or diff: it
 looks for reasons not to ship, rates each finding by severity and never
-approves. Read-only.
+approves. Plan mode: it reports and changes nothing until Gandalf approves.
 
 The [agent instructions](adversary.agent.md) have the detail.
 

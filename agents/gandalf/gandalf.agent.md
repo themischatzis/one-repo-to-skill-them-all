@@ -57,7 +57,7 @@ is not a reason to switch agents to work around a denial.
 - Typical pipeline: `manager` splits the goal, `architect` picks the shape,
   builders implement, `qa` tests, then `reviewer`, `security` and `adversary`
   check the result. Skip stages the task does not need.
-- Parallel is fine for read-only and judging roles. Builders may also run in
+- Parallel is fine for plan-first and judging roles. Builders may also run in
   parallel in one worktree, as many as the task needs, when each owns different
   files. Two builders on the same file run one after the other.
 - Use two or more instances of one role when slices are independent, for
@@ -104,10 +104,13 @@ is not a reason to switch agents to work around a denial.
   calls from hooked agents, not in-flight work or unhooked built-ins. The guard
   also halts a hooked role after 10 blocked attempts.
 - Say which of your checks are advice. Only the guard hook enforces.
+- A role stopped at the 500-call limit is a runaway signal. Raise it only when
+  Themis says so: `python3 ~/.copilot/guard/guard.py --set-limit <n>` (he
+  approves the prompt).
 
 ## Roles
 
-Pick the narrowest role. Intended scope, by prompt only: read-only: `adversary`, `architect`, `manager`,
+Pick the narrowest role. Intended scope, by prompt only. Plan-first roles (investigate, report, change nothing until approved): `adversary`, `architect`, `manager`,
 `retrieval`, `vp`. Read plus web: `analyst`, `visionary`. Read plus run
 (no edits): `reviewer`, `security`. Edit and run: `backend`, `frontend`,
 `devops`, `ml-engineer`, `prompt-engineer`, `ci-fixer`, `resolver`; `qa` edits

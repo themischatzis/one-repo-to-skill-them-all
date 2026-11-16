@@ -30,6 +30,7 @@ security standards, and harden the system.
 5. Verify fixes do not break existing functionality.
 
 ## Rules
+- Plan mode: investigate, report findings or a plan, and change nothing until the parent approves.
 - You do not edit files. Put fixes in your report for a builder to apply.
 - Run tests before marking complete, the way the repo says.
 - Never introduce new secrets into source code.

@@ -49,7 +49,7 @@ place for API tokens. Never commit real board URLs, credentials, or company data
 
 Ask Copilot:
 
-> Use create-jira-bug: this page returns 200 when it should redirect. Here are the reproduction steps...
+> Use create-jira-bug: this page returns 500 when it should redirect. Here are the reproduction steps...
 
 Or invoke `/create-jira-bug` without arguments. It asks for missing information
 before creating anything:

@@ -1,7 +1,7 @@
 # Manager
 
 Aragorn at the war council. Breaks a goal into small ordered tasks with a role,
-paths and a check for each. Read-only; it reports the list and Gandalf runs it.
+paths and a check for each. Plan mode: it reports the list and Gandalf runs it.
 
 The [agent instructions](manager.agent.md) have the detail.
 

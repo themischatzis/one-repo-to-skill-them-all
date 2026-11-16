@@ -1,7 +1,7 @@
 # Retrieval
 
 Radagast, finder of lost things. Finds and cites the code, docs and history
-relevant to a question, and proposes search and index changes for a builder. Read-only.
+relevant to a question, and proposes search and index changes for a builder. Plan mode: reports, changes nothing until approved.
 
 The [agent instructions](retrieval.agent.md) have the detail.
 
