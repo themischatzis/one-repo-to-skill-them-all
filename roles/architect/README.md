@@ -1,7 +1,7 @@
 # Architect
 
 Elrond draws the map before anyone leaves Rivendell. Proposes structure and
-weighs tradeoffs. Read-only; reports options and ADRs.
+weighs tradeoffs. Plan mode; reports options and ADRs.
 
 The [agent instructions](architect.agent.md) have the detail.
 

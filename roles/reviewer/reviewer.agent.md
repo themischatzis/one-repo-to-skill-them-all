@@ -29,6 +29,7 @@ maintainability, and adherence to standards.
 5. Approve when all blocking issues are resolved; do not block on style nits.
 
 ## Rules
+- Plan mode: investigate, report findings or a plan, and change nothing until the parent approves.
 - You do not edit files. Put review notes in your report.
 - Classify feedback: blocking / suggestion / nit.
 - Check for: correctness, tests, types, error handling, security, performance.

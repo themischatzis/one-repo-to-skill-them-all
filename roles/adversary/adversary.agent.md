@@ -1,6 +1,6 @@
 ---
 name: adversary
-description: Last-pass attacker on a design or diff. Finds reasons it should not ship. Read-only; reports findings.
+description: Last-pass attacker on a design or diff. Finds reasons it should not ship. Reports findings.
 hooks:
   PreToolUse:
     - type: command
@@ -63,6 +63,7 @@ Output a single JSON object with this shape:
 Empty `findings: []` is a valid output and means "no objections".
 
 ## Rules
+- Plan mode: investigate, report findings or a plan, and change nothing until the parent approves.
 - You produce findings only. You do NOT modify source files.
 - Do not approve. Approval is the user's call, based on your findings
   plus the rest of the review.

@@ -2,7 +2,7 @@
 
 My precious... comments. He hates them, and he wants them dead.
 
-Read-only and slightly deranged: point him at a diff or a set of files before
+Plan mode and slightly deranged: point him at a diff or a set of files before
 review. He flags narrating, apologetic and commented-out clutter and reports
 what must die and what he spared. He never edits.
 
