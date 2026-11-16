@@ -15,10 +15,12 @@ integrations. Endpoints below are public provider addresses, not account URLs.
 | `figma` | Personal HTTP server | Design context and Figma tools | Configure the remote endpoint and authenticate. |
 | `github-mcp-server` | Built into Copilot CLI | GitHub context and operations | No separate MCP installation. |
 | `ide` | VS Code connection in this session | Editor selection and diagnostics | Connect the editor with `/ide`; not a personal MCP entry. |
+| `playwright` | Personal local (stdio) server, official `@playwright/mcp` | Browser automation through accessibility snapshots | `copilot mcp add playwright -- npx @playwright/mcp@latest` |
+| `chrome-devtools` | Personal local (stdio) server, official `chrome-devtools-mcp` | Inspect and debug a live Chrome: traces, network, console, screenshots | `copilot mcp add chrome-devtools -- npx chrome-devtools-mcp@latest` |
 
-Only Atlassian and Figma are manually configured in the recorded personal
-setup. This inventory does not imply access to every service or tool on a new
-machine. Organisation policy, account permissions, and subscriptions still apply.
+Atlassian, Figma, Playwright and Chrome DevTools are manually configured in
+the personal setup. This inventory does not imply access to every service or
+tool on a new machine. Organisation policy, account permissions, and subscriptions still apply.
 
 ## Install the two remote servers
 
@@ -62,6 +64,22 @@ Figma's remote server does not require the desktop app. Client support and
 account/tool limits are controlled by Figma; see the
 [official remote setup guide](https://developers.figma.com/docs/figma-mcp-server/remote-server-installation/).
 If your client or organisation is blocked, adding the URL alone won't fix it.
+
+## The two browser servers
+
+Local stdio servers; there is no sign-in. Copilot starts each with `npx` on
+first use, so Node.js and network access are needed. Both control a real
+browser, so they can reach any site or logged-in session you give them.
+Review what an agent opens, and keep them out of unattended runs.
+
+- `playwright` ([source](https://github.com/microsoft/playwright-mcp)) drives
+  pages through accessibility snapshots. Use `--isolated` in the command for a
+  throwaway profile.
+- `chrome-devtools` ([source](https://github.com/ChromeDevTools/chrome-devtools-mcp))
+  inspects a live Chrome: performance traces, network, console, screenshots.
+
+Both pin `@latest`, so they update on their own. Check `/mcp` for status; do
+not open a real site as a connection test.
 
 ## GitHub and the editor
 

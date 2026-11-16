@@ -18,6 +18,9 @@ public endpoints, setup commands, authentication, and verification.
   or add a duplicate server.
 - Keep existing local configuration intact. Use named server additions rather
   than replacing `~/.copilot/mcp-config.json` with an example file.
+- Local servers (`playwright`, `chrome-devtools`) are added with
+  `copilot mcp add <name> -- <command>` and need no authentication. They drive
+  a real browser: do not use them unattended or on private sites unasked.
 - Use the client's interactive authentication flow; never ask the user to
   paste OAuth tokens into chat, Markdown, commits, or shell history.
 - Do not dump MCP config, HTTP headers, environment values, OAuth caches, or
