@@ -46,6 +46,8 @@ class InstallTest(unittest.TestCase):
         for role, tool, args, expected in (
             ("gandalf", "atlassian-getJiraIssue", {"issueIdOrKey": "TEST-1"}, None),
             ("backend", "bash", {"command": "gh pr merge 1"}, "deny"),
+            ("backend", "bash", {"command": "cat ~/.copilot/skills/ground-rules/SKILL.md | head -60; git status --short | head; git branch --show-current"}, None),
+            ("backend", "bash", {"command": "cat ~/.copilot/skills/ground-rules/SKILL.md | head -60; cd plugins/example; cat src/publish-guard.ts; sed -n 160,190p inc/helpers.php; cat ../../client-mu-plugins/allowed-blocks.php; grep -rl allowed_blocks ../.. --include=*.php; ls inc inc/*"}, None),
             ("gandalf", "bash", {"command": "gh pr merge 1"}, "ask"),
             ("gandalf", "task", {"agent_type": "backend"}, None),
             ("gandalf", "task", {"agent_type": "explore", "name": "backend"}, None),

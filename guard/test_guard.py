@@ -12,6 +12,7 @@ import guard
 GUARD = os.path.join(os.path.dirname(os.path.abspath(guard.__file__)), "guard.py")
 CWD = os.path.realpath(tempfile.mkdtemp())
 os.environ["GUARD_LOG"] = os.path.join(CWD, "denials.log")
+os.environ["TMPDIR"] = CWD
 GH_TOKEN = "gh" + "p_" + "A" * 36
 AWS_KEY = "AK" + "IA" + "A" * 16
 PEM = "-----BEGIN " + "RSA PRIVATE KEY-----"
@@ -132,7 +133,20 @@ CASES = [
     ("backend", bash("ls ~/.copilot/session-state"), None),
     ("backend", bash("cat ~/.copilot/skills/x/SKILL.md"), None),
     ("backend", bash("ls ~/.copilot"), None),
+    ("backend", bash("cat ~/.copilot/skills/ground-rules/SKILL.md | head -60; git status --short | head; git branch --show-current"), None),
+    ("gandalf", bash("cat ~/.copilot/guard/guard.py; git status --short"), None),
+    ("backend", bash("cat ~/.copilot/skills/ground-rules/SKILL.md; mkdir -p build"), None),
+    ("backend", bash("find ~/.copilot/skills | xargs rm"), "deny"),
+    ("backend", bash("find ~/.copilot/skills |\n xargs rm"), "deny"),
+    ("backend", bash("find ~/.copilot/skills |\\\n xargs rm"), "deny"),
+    ("backend", bash('rm "$(find ~/.copilot/skills -name old)"'), "deny"),
+    ("backend", bash("rm $(find ~/.copilot/skills -name old)"), "deny"),
+    ("backend", bash('D=~/.copilot; rm "$D/agents/backend.agent.md"'), "deny"),
+    ("backend", bash("git -C ~/.copilot config core.hooksPath /tmp/hooks"), "deny"),
+    ("backend", bash("cd ~/.copilot && rm agents/backend.agent.md"), "deny"),
     ("backend", bash("cat ~/.copilot/skills/../config.json"), "deny"),
+    ("backend", bash("cat ~/.copilot/skills/../agents/backend.agent.md"), "deny"),
+    ("backend", bash("cd ~/.copilot/skills; cat ../config.json"), "deny"),
     ("backend", bash("rm ~/.copilot/skills/x"), "deny"),
     ("backend", bash("echo x > ~/.copilot/skills/a"), "deny"),
     ("backend", bash("find ~/.copilot/skills -delete"), "deny"),
@@ -166,6 +180,16 @@ CASES = [
     ("backend", {"tool_name": "web_fetch", "tool_input": {"url": "https://[::1"}}, "deny"),
     ("backend", bash("cd ~/.copilot && cat config.json"), "deny"),
     ("backend", write("~/.copilot/agents/backend.agent.md"), "deny"),
+    ("backend", bash('git commit -m "feat: Add route-guard"'), None),
+    ("backend", bash("cat /tmp/gandalf-guard/STOP"), "deny"),
+    ("gandalf", write("~/.copilot/agents/backend.agent.md"), "ask"),
+    ("gandalf", bash("cp x ~/.copilot/skills/y"), "ask"),
+    ("gandalf", bash("cp x ~/.copilot/skills/y; cat src/token-parser.ts"), "ask"),
+    ("gandalf", bash("cp x ~/.copilot/skills/y; cat ~/.copilot/config.json"), "deny"),
+    ("gandalf", bash("cat ~/.copilot/skills/../agents/backend.agent.md ~/.copilot/settings.json"), "deny"),
+    ("gandalf", bash("cp x ~/.copilot/skills/y; sudo ls"), "deny"),
+    ("gandalf", bash("echo x > ~/.copilot/skills/y > .env"), "deny"),
+    ("gandalf", write("~/.copilot/config.json"), "deny"),
     ("backend", write(".env"), "deny"),
     ("backend", bash("cat .env"), "deny"),
     ("backend", bash("cat < .env"), "deny"),
@@ -227,6 +251,7 @@ CASES = [
     ("backend", patch(".env"), "deny"),
     ("backend", patch("src/app.py", move=".env"), "deny"),
     ("backend", patch("~/.copilot/agents/backend.agent.md"), "deny"),
+    ("gandalf", patch("~/.copilot/agents/backend.agent.md", move=".env"), "deny"),
     ("backend", patch("src/app.py", GH_TOKEN), "deny"),
     ("backend", {**patch(".env"), "tool_name": "Write"}, "deny"),
     ("backend", {"tool_name": "apply_patch", "tool_input": "not a patch"}, "deny"),
@@ -251,6 +276,19 @@ class GuardTest(unittest.TestCase):
             with self.subTest(role=role, event=event):
                 reason = guard.check(role, event)
                 self.assertEqual(kind(reason), expected, reason)
+
+    def test_copilot_reads_do_not_restrict_unrelated_repo_paths(self):
+        skill = "cat ~/.copilot/skills/ground-rules/SKILL.md | head -60"
+        repo_batches = (
+            "cd plugins/example; cat src/publish-guard.ts; sed -n 160,190p inc/helpers.php; "
+            "cat ../../client-mu-plugins/allowed-blocks.php; grep -rl allowed_blocks ../.. --include=*.php; ls inc inc/*",
+            "cat config.json settings.json src/token-parser.ts",
+        )
+        for role in ("backend", "gandalf"):
+            for repo in repo_batches:
+                for command in (f"{skill}; {repo}", f"{repo}; {skill}"):
+                    with self.subTest(role=role, command=command):
+                        self.assertIsNone(guard.check(role, {**bash(command), "cwd": CWD}))
 
     def test_ask_reaches_copilot_as_a_prompt(self):
         out = subprocess.run([sys.executable, GUARD, "gandalf"], capture_output=True, text=True,
@@ -345,6 +383,25 @@ class GuardTest(unittest.TestCase):
         line = pathlib.Path(log).read_text()
         self.assertIn('"code": "sudo"', line)
         self.assertNotIn("secret-plan", line)
+
+    def test_denial_shows_rule_and_reason_without_boilerplate(self):
+        out, log = self.run_guard({**bash("sudo ls"), "cwd": CWD, "session_id": "message-test"})
+        result = json.loads(out)
+        self.assertEqual(result["permissionDecision"], "deny")
+        self.assertEqual(result["permissionDecisionReason"], "BLOCKED [sudo] backend: sudo is not allowed.")
+        self.assertEqual(json.loads(pathlib.Path(log).read_text())["code"], "sudo")
+
+    def test_state_denial_has_its_own_rule_code(self):
+        out, log = self.run_guard({**bash("rm /tmp/gandalf-guard/STOP"), "cwd": CWD, "session_id": "state-message-test"})
+        result = json.loads(out)
+        self.assertEqual(result["permissionDecisionReason"],
+                         "BLOCKED [state] backend: guard state is protected (matched 'gandalf-guard/STOP').")
+        self.assertEqual(json.loads(pathlib.Path(log).read_text())["code"], "state")
+
+    def test_copilot_denial_names_the_non_read_command(self):
+        out, _ = self.run_guard({**bash("cp x ~/.copilot/skills/y"), "cwd": CWD, "session_id": "copilot-message-test"})
+        self.assertEqual(json.loads(out)["permissionDecisionReason"],
+                         "BLOCKED [config] backend: Copilot home: cp may write or execute code.")
 
     def test_lease_push_only_right_after_a_rebase(self):
         repo = os.path.realpath(tempfile.mkdtemp())

@@ -36,3 +36,4 @@
 | Only Gandalf spawns workers, with explicit agent types and no recursive orchestration | `guard/guard.py`; `guard/test_guard.py` |
 | Specialist selection, peer collaboration and built-in supervision | Advisory: Gandalf's briefs and oversight; built-ins do not have role hooks |
 | Branch changes cannot revert installed agents, guard or routing | `scripts/install-agents.py`; `scripts/test_install_agents.py` |
+| Copilot path restrictions do not block unrelated repo commands in the same batch | `guard/test_guard.py`; `scripts/test_install_agents.py` |

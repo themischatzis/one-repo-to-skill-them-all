@@ -24,9 +24,13 @@ Denied for hooked roles:
   after a finished rebase.
 - **Privilege and secrets**: `sudo`, environment dumps, `gh auth token`, secret
   env vars, `.env`, keys, `~/.ssh`, token patterns.
-- **Copilot's own files**: any write under `~/.copilot`, and reads of
+- **Copilot's own files**: any write under `~/.copilot` (denied, except Gandalf's,
+  which ask Themis first), and reads of
   `config.json`, `mcp-config.json`, `settings.json` and files named oauth,
-  token, credential or secret. Other reads there are fine.
+  token, credential or secret. Other reads there are fine, including batches
+  that read a skill and then run unrelated repo commands. Copilot path checks
+  do not apply to `../`, `config.json` or token-related source filenames
+  elsewhere in the repo.
 - **Tampering**: the guard's state files, `--set-limit` (asks for Gandalf).
 - **Spawning**: workers started by anyone but Gandalf, or without an explicit
   `agent_type`.
@@ -60,6 +64,16 @@ code, short session id; never the command, path or token) to
 agents can read it. Set `GUARD_LOG` to move it. Count denials by rule with
 `jq -r .code ~/.copilot/guard-logs/denials.log | sort | uniq -c | sort -rn`.
 
+Denials show the rule and reason, for example:
+
+```text
+BLOCKED [state] backend: guard state is protected (matched 'gandalf-guard/STOP').
+```
+
+In Copilot CLI, click the failed tool entry or press `Ctrl+O` on an empty
+prompt to expand the full error. The CLI controls its colour. The guard emits
+plain JSON, not terminal colour codes.
+
 ## Stopping agents
 
 - Open `/tasks`, select a worker and press `x` to stop it.
@@ -75,7 +89,7 @@ agents can read it. Set `GUARD_LOG` to move it. Count denials by rule with
 |---|---|
 | **Merge**: `git merge`, `gh pr merge` and merge calls through `gh api` are denied for roles. Gandalf **asks Themis** (a real prompt) | `test_guard.py`; live: `backend` `gh pr merge` denied |
 | `sudo`, plain force-push (`--force`, `-f`, `+ref`, `:ref`, `--delete`) and `gh api -X DELETE` are denied (Gandalf asks for the API delete). `--force-with-lease` is allowed only right after a finished rebase (last reflog entry). Publishing, deploys, ssh and cloud CLIs, `curl | sh` and `curl` uploads **ask Themis** for every agent | `test_guard.py` |
-| Secret files, secret env vars, env dumps, `gh auth token`, token patterns. Under `~/.copilot` agents may read everything except `config.json`, `mcp-config.json`, `settings.json` and files named oauth, token, credential or secret; every write is denied. Shell reads there work with read-only commands (`ls`, `cat`, `grep`, `rg` without `--pre`, `find` without `-delete`/`-exec`); globs on hidden names are denied | `test_guard.py`; live: `$GITHUB_TOKEN` read blocked |
+| Secret files, secret env vars, env dumps, `gh auth token`, token patterns. Under `~/.copilot` agents may read everything except `config.json`, `mcp-config.json`, `settings.json` and files named oauth, token, credential or secret. Writes there are denied for every role except Gandalf, whose writes ask Themis first. Read-only pipelines there can share a batch with unrelated repo commands. Pipelines that execute or write, and commands after `cd ~/.copilot`, stay checked. Hard denials take precedence over approval prompts | `test_guard.py`; `../scripts/test_install_agents.py` |
 | Any hooked role can research public https; private URLs and credentials are denied | `test_guard.py` |
 | Only Gandalf starts workers, with an explicit custom or built-in `agent_type`. Missing types and recursive Gandalf runs are denied | `test_guard.py` |
 | Freeform patches check every file and move target for secrets and protected configuration | `test_guard.py`; `../scripts/test_install_agents.py` |
