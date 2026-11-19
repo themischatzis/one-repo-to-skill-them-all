@@ -39,7 +39,7 @@ TOKENS = re.compile(
     r"|(?<![A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}|AIza[\w-]{35}|-----BEGIN [A-Z ]*PRIVATE KEY-----"
     r"|eyJ[\w-]{10,}\.[\w-]{10,}\.[\w-]{10,}")
 COPILOT_HOME = re.compile(r"\.copilot(?:/|\b)")
-# Anything under ~/.copilot can be read except files holding tokens or settings; every write is off limits.
+# Copilot writes require Gandalf and approval; credentials and settings stay protected.
 SENSITIVE_COPILOT = re.compile(r"(?i)\b(?:config|mcp-config|settings)\.json\b|[\w.-]*(?:oauth|token|credential|secret)[\w.-]*")
 READ_CMDS = {"ls", "cat", "head", "tail", "wc", "grep", "rg", "find", "stat", "file", "diff", "jq", "du", "cd", "pwd", "echo", "cut"}
 FIND_WRITES = {"-delete", "-exec", "-execdir", "-ok", "-okdir", "-fprint", "-fls", "-fprintf", "--pre", "--pre-glob"}
@@ -51,7 +51,7 @@ SECRET_CMD = re.compile(r"\bgh\s+auth\s+(?:token|status\s+(?:-t|--show-token))\b
 FORCE_PUSH = re.compile(r"^(?:--force|--prune|--delete|--mirror|-[a-zA-Z]*[fd][a-zA-Z]*|[+:].+)$")
 LEASE_PUSH = re.compile(r"^--force-with-lease(?:=.*)?$")
 SET_LIMIT = re.compile(r"^\s*python3?\s+(?:~|\$HOME|/\S+?)/\.copilot/guard/guard\.py\s+--set-limit\s+\d{3,6}\s*$")
-STATE_TAMPER = re.compile(r"gandal\S*-g|-guard\b|guard\.py\s+--set-limit|/(?:STOP|LIMIT)\b")
+STATE_TAMPER = re.compile(r"gandal\S*-g\S*|guard\.py\s+--set-limit|/(?:STOP|LIMIT)\b")
 
 
 def after_rebase(cwd):
@@ -92,31 +92,37 @@ def resolve(path, cwd):
     return os.path.realpath(os.path.join(cwd, os.path.expanduser(path)))
 
 
-def path_problem(path, cwd, write):
+def path_problem(path, cwd, write, orch=False):
     """Why a file path is off limits, or None."""
     real = resolve(path, cwd)
     lexical = os.path.normpath(os.path.join(cwd, os.path.expanduser(path)))
     if write and ("gandalf-guard" in real or "gandalf-guard" in lexical):
-        return "the guard's state is only for Themis to change"
+        return f"guard state is protected: {path}"
     if SECRET.search(real) or SECRET.search(lexical):
         return f"{path} looks like a secret file"
     for p in (real, lexical):
         if COPILOT_HOME.search(p) and (write or SENSITIVE_COPILOT.search(p)):
+            if write and orch and not SENSITIVE_COPILOT.search(p):
+                return f"{ASK}writing under Copilot's home is only for Themis to approve"
             return "Copilot's own config is off limits"
     return None
 
 
 def parse(command):
-    """Split a command into (segments of words, redirect targets). Raises ValueError if unparseable."""
+    """Return word segments, redirect targets and pipeline group IDs."""
     lex = shlex.shlex(command, posix=True, punctuation_chars=True)
     lex.whitespace_split = True
     segments, words, targets, redirect = [], [], [], False
+    groups, group = [], 0
     for tok in lex:
         if redirect:
             targets.append(tok)
             redirect = False
         elif set(tok) <= set("();&|"):
             segments.append(words)
+            groups.append(group)
+            if tok.strip(";") not in ("|", "|&"):
+                group += 1
             words = []
         elif "<<" in tok:
             raise ValueError("heredocs are not supported, use the edit tool")
@@ -124,7 +130,9 @@ def parse(command):
             redirect = ">" in tok
         else:
             words.append(tok)
-    return segments + [words], [t for t in targets if t != "/dev/null" and not re.match(r"&?\d*-?$", t)]
+    return (segments + [words],
+            [t for t in targets if t != "/dev/null" and not re.match(r"&?\d*-?$", t)],
+            groups + [group])
 
 
 def sub_index(args):
@@ -196,20 +204,32 @@ def check_words(words, orch, cwd="."):
     return None
 
 
-def copilot_reads_only(bare, segments):
-    """True when every .copilot mention is a readable subpath and every command only reads."""
-    if re.search(r"(?:^|[/\s])\.\.(?:/|\s|$)", bare):
-        return False
-    if SENSITIVE_COPILOT.search(bare):
-        return False
-    for words in segments:
+def copilot_read_problem(segments, groups, orch):
+    """Check Copilot-touching pipelines without restricting unrelated commands."""
+    relevant = {group for words, group in zip(segments, groups) if COPILOT_HOME.search(" ".join(words))}
+    problems, inside = [], False
+    for words, group in zip(segments, groups):
+        if not inside and group not in relevant:
+            continue
+        for path in words:
+            if not inside and not COPILOT_HOME.search(path):
+                continue
+            if SENSITIVE_COPILOT.search(path):
+                return "Copilot credentials and settings are protected"
+            if re.search(r"(?:^|[/\s])\.\.(?:/|\s|$)", path):
+                problems.append(f"{ASK if orch else ''}Copilot home: parent-directory traversal in {path!r}")
+        if any("=" in w.split("/")[0] and COPILOT_HOME.search(w) for w in words):
+            inside = True
         words = [w for w in words if "=" not in w.split("/")[0]]
         if words and (os.path.basename(words[0]) not in READ_CMDS or FIND_WRITES & set(words[1:])):
-            return False
-    return True
+            problems.append(f"{ASK if orch else ''}Copilot home: {os.path.basename(words[0])} may write or execute code")
+        if words and os.path.basename(words[0]) == "cd":
+            inside = True
+    return next((p for p in problems if not p.startswith(ASK)), problems[0] if problems else None)
 
 
 def check_shell(command, cwd, orch):
+    command = re.sub(r"\\\r?\n", "", command)
     bare = command.replace("'", "").replace('"', "").replace("\\", "")
     if SECRET.search(command) or SECRET.search(bare) or SECRET_CMD.search(command) or "/proc/" in command and "environ" in command:
         return "the command touches a secret file"
@@ -218,8 +238,8 @@ def check_shell(command, cwd, orch):
     # The one way to raise the call limit: Gandalf runs it and Themis approves the prompt.
     if SET_LIMIT.match(command):
         return f"{ASK if orch else ''}raising the call limit is only for Themis to approve"
-    if STATE_TAMPER.search(command):
-        return f"{ASK if orch else ''}the guard's state is only for Themis to change"
+    if m := STATE_TAMPER.search(command):
+        return f"{ASK if orch else ''}guard state is protected (matched {m.group(0)!r})"
     if HIDDEN_GLOB.search(bare) or DYNAMIC_SUB.search(command):
         return "globs on hidden names and dynamic git or gh subcommands are not allowed"
     if MERGE_API.search(command) or DELETE_API.search(command):
@@ -228,15 +248,19 @@ def check_shell(command, cwd, orch):
         return f"{ASK}curl upload or pipe to shell is sensitive"
     # Line breaks and substitutions split into segments, so each part is still checked.
     try:
-        segments, targets = parse(re.sub(r"[\r\n`]|\$\(|[<>]\(", ";", command))
+        segments, targets, groups = parse(re.sub(r"[\r\n`]|\$\(|[<>]\(", ";", command))
     except ValueError:
         segments, targets = [w.split() for w in re.split(r"[;&|()\r\n`]+", command)], []
-    if COPILOT_HOME.search(bare) and not copilot_reads_only(bare, segments):
-        return "the command touches Copilot's config"
+        groups = [0] * len(segments)
+    if re.search(r"`|\$\(|[<>]\(", command):
+        groups = [0] * len(segments)
+    problems = []
+    if COPILOT_HOME.search(bare) and (problem := copilot_read_problem(segments, groups, orch)):
+        problems.append(problem)
     for target in targets:
-        if problem := path_problem(target, cwd, True):
-            return problem
-    problems = [p for words in segments if (p := check_words(words, orch, cwd))]
+        if problem := path_problem(target, cwd, True, orch):
+            problems.append(problem)
+    problems.extend(p for words in segments if (p := check_words(words, orch, cwd)))
     return next((p for p in problems if not p.startswith(ASK)), problems[0] if problems else None)
 
 
@@ -264,7 +288,8 @@ def check(role, event):
         paths = re.findall(r"(?m)^\*\*\* (?:Add File|Update File|Delete File|Move to): (.+)$", args)
         if not paths or not args.startswith("*** Begin Patch\n") or not args.rstrip().endswith("*** End Patch"):
             return "the patch has no checkable file operations"
-        return next((p for path in paths if (p := path_problem(path, cwd, True))), None)
+        problems = [p for path in paths if (p := path_problem(path, cwd, True, orch))]
+        return next((p for p in problems if not p.startswith(ASK)), problems[0] if problems else None)
     args = args or {}
     if not isinstance(args, dict):
         return f"the {name} tool input is not an object ({type(args).__name__})"
@@ -277,7 +302,7 @@ def check(role, event):
             return "the command is not a string"
         return check_shell(command, cwd, orch)
     if tool in ("Write", "Read") and path:
-        return path_problem(path, cwd, tool == "Write")
+        return path_problem(path, cwd, tool == "Write", orch)
     if tool in ("WebFetch", "WebSearch"):
         try:
             url = urlparse(str(args.get("url", "")))
@@ -386,12 +411,17 @@ def crash_reason(role, raw, error):
 
 
 RULE_CODES = (
-    ("guard failed", "crash"), ("STOP", "stop"), ("blocked attempts", "halt"), ("tool calls", "budget"),
+    ("guard failed", "crash"), ("guard state", "state"), ("STOP", "stop"),
+    ("blocked attempts", "halt"), ("tool calls", "budget"),
     ("sudo", "sudo"), ("force-push", "force-push"), ("merg", "merge"), ("secret", "secret"),
     ("Copilot", "config"), ("environment", "env"), ("sensitive", "ask-cmd"), ("agent", "spawn"),
     ("https", "web"), ("patch", "patch"),
 )
 LOG_LIMIT = 1_000_000
+
+
+def rule_code(reason):
+    return next((code for text, code in RULE_CODES if text in reason), "other")
 
 
 def log_decision(role, raw, reason, crashed):
@@ -406,7 +436,7 @@ def log_decision(role, raw, reason, crashed):
             tool, session = str(event.get("tool_name", "")), str(event.get("session_id", ""))[:8]
         except Exception:
             tool, session = "", ""
-        code = "crash-allowed" if crashed and not reason else next((c for s, c in RULE_CODES if s in (reason or "")), "other")
+        code = "crash-allowed" if crashed and not reason else rule_code(reason or "")
         kind = "ask" if reason and reason.startswith(ASK) else "deny" if reason else "allow"
         line = json.dumps({"ts": int(time.time()), "role": role, "tool": tool, "kind": kind, "code": code, "session": session})
         fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o600)
@@ -437,7 +467,7 @@ def main():
     elif reason:
         print(json.dumps({
             "permissionDecision": "deny",
-            "permissionDecisionReason": f"Blocked by guard ({role}): {reason}. Report BLOCKED to the parent with this reason; do not look for another route.",
+            "permissionDecisionReason": f"BLOCKED [{rule_code(reason)}] {role}: {reason}.",
         }))
 
 
